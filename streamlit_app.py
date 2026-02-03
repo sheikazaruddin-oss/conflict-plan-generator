@@ -11,7 +11,7 @@ def show_logo_top_left(image_path, width=120):
         <style>
         .top-left-logo {{
             position: fixed;
-            top: 15px;
+            top: 25px;
             left: 20px;
             z-index: 100;
         }}
@@ -24,7 +24,6 @@ def show_logo_top_left(image_path, width=120):
     )
 
 show_logo_top_left("logo.png")  # Call the logo
-st.markdown("<br><br><br><br><br>", unsafe_allow_html=True)
 st.set_page_config(page_title="Conflict Plan Generator")
 st.title("✈️ Conflict Plan Generator")
 st.subheader("Ownership Aircraft Parameters")
