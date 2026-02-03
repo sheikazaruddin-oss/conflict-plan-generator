@@ -11,7 +11,7 @@ def show_logo_top_left(image_path, width=120):
         <style>
         .top-left-logo {{
             position: fixed;
-            top: 25px;
+            top: 50px;
             left: 20px;
             z-index: 100;
         }}
