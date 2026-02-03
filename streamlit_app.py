@@ -1,21 +1,41 @@
 import streamlit as st
 from conflict_math import compute_conflict_geometry
 from plan_writer import write_plan_file
+import base64
 
+def show_logo_top_left(image_path, width=120):
+    with open(image_path, "rb") as image_file:
+        encoded = base64.b64encode(image_file.read()).decode()
+    st.markdown(
+        f"""
+        <style>
+        .top-left-logo {{
+            position: fixed;
+            top: 15px;
+            left: 20px;
+            z-index: 100;
+        }}
+        </style>
+        <div class="top-left-logo">
+            <img src="data:image/png;base64,{encoded}" width="{width}">
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+show_logo_top_left("logo.png")  # Call the logo
 st.set_page_config(page_title="Conflict Plan Generator")
-
-st.title("🛩️ Conflict Plan Generator")
-
+st.title("✈️ Conflict Plan Generator")
 st.subheader("Ownership Aircraft Parameters")
 
 tcpa = st.number_input("TCPA (s)", value=60.0)
 cpa_dist = st.number_input("CPA Distance (m)", value=200.0)
-os_lat = st.number_input("Ownship Latitude", value=37.618805)
-os_lon = st.number_input("Ownship Longitude", value=-122.375416)
-os_alt = st.number_input("Ownship Altitude (m)", value=50.0)
-os_course = st.number_input("Ownship Course (deg)", value=90.0)
-os_speed = st.number_input("Ownship Speed (m/s)", value=20.0)
-os_vspeed = st.number_input("Ownship Vertical Speed (m/s)", value=1.0)
+os_lat = st.number_input("Ownership Latitude", value=37.618805)
+os_lon = st.number_input("Ownership Longitude", value=-122.375416)
+os_alt = st.number_input("Ownership Altitude (m)", value=50.0)
+os_course = st.number_input("Ownership Course (deg)", value=90.0)
+os_speed = st.number_input("Ownership Speed (m/s)", value=20.0)
+os_vspeed = st.number_input("Ownership Vertical Speed (m/s)", value=1.0)
 
 st.subheader("Target Aircraft Parameters")
 
