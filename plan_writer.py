@@ -1,8 +1,20 @@
 import json
-import os
 
-def write_plan_file(filename, wp1, wp2, vehicle_id="Generic"):
-    plan = {
+def make_waypoint(lat, lon, alt, idx):
+    return {
+        "AMSLAltAboveTerrain": None,
+        "Altitude": alt,
+        "AltitudeMode": 1,
+        "autoContinue": True,
+        "command": 16,
+        "doJumpId": idx,
+        "frame": 3,
+        "params": [0, 0, 0, None, lat, lon, alt],
+        "type": "SimpleItem"
+    }
+
+def write_plan_file(path, waypoints, home_position):
+    data = {
         "fileType": "Plan",
         "geoFence": {"circles": [], "polygons": [], "version": 2},
         "groundStation": "QGroundControl",
@@ -11,45 +23,20 @@ def write_plan_file(filename, wp1, wp2, vehicle_id="Generic"):
             "firmwareType": 12,
             "hoverSpeed": 5,
             "items": [
-                {
-                    "AMSLAltAboveTerrain": None,
-                    "Altitude": wp1[2],
-                    "AltitudeMode": 1,
-                    "autoContinue": True,
-                    "command": 16,
-                    "doJumpId": 1,
-                    "frame": 3,
-                    "params": [0, 0, 0, None, wp1[0], wp1[1], wp1[2]],
-                    "type": "SimpleItem"
-                },
-                {
-                    "AMSLAltAboveTerrain": None,
-                    "Altitude": wp2[2],
-                    "AltitudeMode": 1,
-                    "autoContinue": True,
-                    "command": 16,
-                    "doJumpId": 2,
-                    "frame": 3,
-                    "params": [0, 0, 0, None, wp2[0], wp2[1], wp2[2]],
-                    "type": "SimpleItem"
-                }
+                make_waypoint(waypoints[0][0], waypoints[0][1], waypoints[0][2], 1),
+                make_waypoint(waypoints[1][0], waypoints[1][1], waypoints[1][2], 2)
             ],
-            "plannedHomePosition": [wp1[0], wp1[1], wp1[2]],
+            "plannedHomePosition": list(home_position),
             "vehicleType": 2,
             "version": 2
         },
         "rallyPoints": {"points": [], "version": 2},
         "version": 1
     }
+    with open(path, 'w') as f:
+        json.dump(data, f, indent=4)
 
-    with open(filename, 'w') as f:
-        json.dump(plan, f, indent=4)
-
-def write_waypoint_file(filename, wp1, wp2):
-    lines = [
-        "QGC WPL 110",
-        f"0\t1\t0\t16\t0\t0\t0\t0\t{wp1[0]}\t{wp1[1]}\t{wp1[2]}\t1",
-        f"1\t0\t0\t16\t0\t0\t0\t0\t{wp2[0]}\t{wp2[1]}\t{wp2[2]}\t1"
-    ]
-    with open(filename, 'w') as f:
-        f.write('\n'.join(lines))
+def write_waypoints_file(path, waypoints):
+    with open(path, 'w') as f:
+        for lat, lon, alt in waypoints:
+            f.write(f"{lat},{lon},{alt}\n")
