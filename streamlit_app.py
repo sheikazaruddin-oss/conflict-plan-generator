@@ -1,5 +1,5 @@
 import streamlit as st
-from conflict_math import compute_conflict_geometry
+from conflict_math import calculate_cpa_geometry
 from plan_writer import write_plan_file, write_waypoint_file
 import base64
 
@@ -49,7 +49,7 @@ relative_heading_deg = st.number_input("Relative Heading (deg)", value=0.0)
 
 if st.button("✅ Generate plan files"):
     try:
-        points = compute_conflict_geometry(
+        points = calculate_cpa_geometry(
             tcpa_sec=tcpa_sec,
             cpa_horiz_m=cpa_dist_m,
             os_lat_deg=os_lat_deg,
