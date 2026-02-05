@@ -26,32 +26,39 @@ def compute_conflict_geometry(
     target_alto_m,
     relative_heading_deg
 ):
-    # Convert course and heading
-    course_rad = math.radians(os_course_deg % 360)
-    tgt_heading_rad = math.radians((os_course_deg + relative_heading_deg) % 360)
-
-    # Ownship motion
-    dx_os = os_speed_mps * tcpa_sec * math.sin(course_rad)
-    dy_os = os_speed_mps * tcpa_sec * math.cos(course_rad)
+    # Ownship motion vector
+    os_course_rad = math.radians(os_course_deg % 360)
+    dx_os = os_speed_mps * tcpa_sec * math.cos(os_course_rad)
+    dy_os = os_speed_mps * tcpa_sec * math.sin(os_course_rad)
     dz_os = os_vspeed_mps * tcpa_sec
     os_alt_cpa = os_alt_m + dz_os
 
-    # CPA offset for target based on heading
-    dx_tgt = -cpa_horiz_m * math.sin(tgt_heading_rad)
-    dy_tgt = -cpa_horiz_m * math.cos(tgt_heading_rad)
+    # CPA position of ownship
+    os_cpa_x = dx_os
+    os_cpa_y = dy_os
 
-    # Compute lat/lon positions
+    # Target motion vector based on relative heading
+    tgt_course_deg = (os_course_deg + relative_heading_deg) % 360
+    tgt_course_rad = math.radians(tgt_course_deg)
+    dx_tgt = rel_speed_mps * tcpa_sec * math.cos(tgt_course_rad)
+    dy_tgt = rel_speed_mps * tcpa_sec * math.sin(tgt_course_rad)
+
+    # Target altitude at CPA
+    tgt_alt_cpa = os_alt_cpa + conflict_dh_m
+    tgt_start_alt = tgt_alt_cpa + target_alto_m
+
+    # Start positions
     os_start = (os_lat_deg, os_lon_deg, os_alt_m)
     os_cpa = meters_to_latlon(os_lat_deg, os_lon_deg, dx_os, dy_os)
-    os_cpa = (os_cpa[0], os_cpa[1], os_alt_cpa)
+    os_cpa = (*os_cpa, os_alt_cpa)
 
-    tgt_start = (os_lat_deg, os_lon_deg, target_alto_m)
-    tgt_cpa = meters_to_latlon(os_lat_deg, os_lon_deg, dx_os + dx_tgt, dy_os + dy_tgt)
-    tgt_cpa = (tgt_cpa[0], tgt_cpa[1], os_alt_cpa + conflict_dh_m)
+    tgt_cpa = os_cpa
+    tgt_start = meters_to_latlon(os_lat_deg, os_lon_deg, dx_os - dx_tgt, dy_os - dy_tgt)
+    tgt_start = (*tgt_start, tgt_start_alt)
 
     return {
-        "os_start": os_start,
-        "os_cpa": os_cpa,
-        "tgt_start": tgt_start,
-        "tgt_cpa": tgt_cpa
+    "os_start": os_start,
+    "os_cpa": os_cpa,
+    "tgt_start": tgt_start,
+    "tgt_cpa": tgt_cpa
     }
