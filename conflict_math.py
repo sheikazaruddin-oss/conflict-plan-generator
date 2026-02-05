@@ -22,6 +22,7 @@ def compute_conflict_geometry(
     os_speed_mps,
     os_vspeed_mps,
     rel_speed_mps,
+    conflict_dh_m,
     target_alto_m,
     relative_heading_deg
 ):

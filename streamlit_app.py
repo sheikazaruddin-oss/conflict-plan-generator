@@ -54,6 +54,7 @@ if st.button("✅ Generate plan files"):
             os_speed_mps=os_speed,
             os_vspeed_mps=os_vspeed,
             rel_speed_mps=rel_speed,
+            conflict_dh_m=conflict_dh,
             target_alto_m=tgt_alt_offset,
             relative_heading_deg=relative_heading
         )
