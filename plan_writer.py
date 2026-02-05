@@ -37,6 +37,20 @@ def write_plan_file(path, waypoints, home_position):
         json.dump(data, f, indent=4)
 
 def write_waypoints_file(path, waypoints):
+    """
+    Write ArduPilot .waypoints file for QGroundControl (text format).
+    Each entry is a standard MAVLink waypoint (command 16).
+    """
     with open(path, 'w') as f:
-        for lat, lon, alt in waypoints:
-            f.write(f"{lat},{lon},{alt}\n")
+        f.write("QGC WPL 110\n") # Header
+
+        for i, (lat, lon, alt) in enumerate(waypoints):
+            current = 1 if i == 0 else 0 # Mark first waypoint as current
+            frame = 0 # 0 = MAV_FRAME_GLOBAL
+            command = 16 # NAV_WAYPOINT
+            param1, param2, param3, param4 = 0, 0, 0, 0
+            autocontinue = 1
+
+            f.write(f"{i}\t{current}\t{frame}\t{command}\t")
+            f.write(f"{param1}\t{param2}\t{param3}\t{param4}\t")
+            f.write(f"{lat:.8f}\t{lon:.8f}\t{alt:.2f}\t{autocontinue}\n")
