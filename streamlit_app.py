@@ -39,7 +39,6 @@ os_vspeed = st.number_input("Ownership Vertical Speed (m/s)", value=1.8)
 
 st.subheader("Target Aircraft Parameters")
 rel_speed = st.number_input("Relative Speed (m/s)", value=10.0)
-conflict_dh = st.number_input("Conflict Altitude Diff (m)", value=30.0)
 tgt_alt_offset = st.number_input("Target Alt Offset (m)", value=50.0)
 relative_heading = st.number_input("Relative Heading (deg)", value=95.0)
 
