@@ -2,7 +2,7 @@ import json
 
 def make_waypoint(lat, lon, alt, idx):
     return {
-        "AMSLAltAboveTerrain": None,
+        "AMSLAltAboveTerrain": False,
         "Altitude": alt,
         "AltitudeMode": 1,
         "autoContinue": True,
