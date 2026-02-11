@@ -80,3 +80,54 @@ def write_waypoints_file(path, waypoints):
                 f"{param1}\t{param2}\t{param3}\t{param4}\t"
                 f"{lat:.8f}\t{lon:.8f}\t{alt:.2f}\t{autocontinue}\n"
             )
+            
+def write_kml_file(path, waypoints, name="CPA Mission"):
+    """
+    Write a standard flight KML file compatible with Google Earth.
+    """
+
+    def kml_coord(lat, lon, alt):
+        return f"{lon},{lat},{alt}"
+
+    with open(path, "w") as f:
+        f.write('<?xml version="1.0" encoding="UTF-8"?>\n')
+        f.write('<kml xmlns="http://www.opengis.net/kml/2.2">\n')
+        f.write('  <Document>\n')
+        f.write(f'    <name>{name}</name>\n')
+
+        # ---- Style for flight path ----
+        f.write('    <Style id="flightPath">\n')
+        f.write('      <LineStyle>\n')
+        f.write('        <color>ff0000ff</color>\n')  # Red line (AABBGGRR)
+        f.write('        <width>3</width>\n')
+        f.write('      </LineStyle>\n')
+        f.write('    </Style>\n')
+
+        # ---- Flight path LineString ----
+        f.write('    <Placemark>\n')
+        f.write('      <name>Flight Path</name>\n')
+        f.write('      <styleUrl>#flightPath</styleUrl>\n')
+        f.write('      <LineString>\n')
+        f.write('        <tessellate>1</tessellate>\n')
+        f.write('        <altitudeMode>absolute</altitudeMode>\n')
+        f.write('        <coordinates>\n')
+
+        for lat, lon, alt in waypoints:
+            f.write(f'          {kml_coord(lat, lon, alt)}\n')
+
+        f.write('        </coordinates>\n')
+        f.write('      </LineString>\n')
+        f.write('    </Placemark>\n')
+
+        # ---- Individual waypoints ----
+        for i, (lat, lon, alt) in enumerate(waypoints):
+            f.write('    <Placemark>\n')
+            f.write(f'      <name>WP {i}</name>\n')
+            f.write('      <Point>\n')
+            f.write('        <altitudeMode>absolute</altitudeMode>\n')
+            f.write(f'        <coordinates>{kml_coord(lat, lon, alt)}</coordinates>\n')
+            f.write('      </Point>\n')
+            f.write('    </Placemark>\n')
+
+        f.write('  </Document>\n')
+        f.write('</kml>\n')

@@ -1,6 +1,6 @@
 import streamlit as st
 from conflict_math import compute_conflict_geometry
-from plan_writer import write_plan_file, write_waypoints_file
+from plan_writer import write_plan_file, write_waypoints_file, write_kml_file
 import base64
 
 def show_logo_top_left(image_path, width=120):
@@ -65,6 +65,9 @@ if st.button("✅ Generate plan files"):
         write_plan_file("target.plan", [points["tgt_start"], points["tgt_cpa"]], home)
         write_waypoints_file("ownership.waypoints", [points["os_start"], points["os_cpa"]])
         write_waypoints_file("target.waypoints", [points["tgt_start"], points["tgt_cpa"]])
+        write_kml_file("ownership.waypoints", [points["os_start"], points["os_cpa"]])
+        write_kml_file("target.waypoints", [points["tgt_start"], points["tgt_cpa"]])
+
 
         with open("ownership.plan", "rb") as f:
             st.download_button("Download Ownership Plan", f, file_name="ownership.plan")
@@ -77,6 +80,13 @@ if st.button("✅ Generate plan files"):
 
         with open("target.waypoints", "rb") as f:
             st.download_button("Download Target Waypoints", f, file_name="target.waypoints")
+            
+        with open("ownership.kml", "rb") as f:
+            st.download_button("Download Ownership kml", f, file_name="ownership.kml")
+
+        with open("target.kml", "rb") as f:
+            st.download_button("Download Target kml", f, file_name="target.kml")
+
 
     except Exception as e:
         st.error(f"❌ Error: {e}")
