@@ -65,8 +65,8 @@ if st.button("✅ Generate plan files"):
         write_plan_file("target.plan", [points["tgt_start"], points["tgt_cpa"]], home)
         write_waypoints_file("ownership.waypoints", [points["os_start"], points["os_cpa"]])
         write_waypoints_file("target.waypoints", [points["tgt_start"], points["tgt_cpa"]])
-        write_kml_file("ownership.waypoints", [points["os_start"], points["os_cpa"]])
-        write_kml_file("target.waypoints", [points["tgt_start"], points["tgt_cpa"]])
+        write_kml_file("ownership.kml", [points["os_start"], points["os_cpa"]])
+        write_kml_file("target.kml", [points["tgt_start"], points["tgt_cpa"]])
 
 
         with open("ownership.plan", "rb") as f:
