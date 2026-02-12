@@ -52,7 +52,7 @@ def compute_conflict_geometry(
     os_cpa = meters_to_latlon(os_lat_deg, os_lon_deg, dx_os, dy_os)
     os_cpa = (*os_cpa, os_alt_cpa)
 
-    tgt_cpa = os_cpa
+    tgt_cpa = (os_cpa[0], os_cpa[1], tgt_alt_cpa)
     tgt_start = meters_to_latlon(os_lat_deg, os_lon_deg, dx_os - dx_tgt, dy_os - dy_tgt)
     tgt_start = (*tgt_start, tgt_start_alt)
 
