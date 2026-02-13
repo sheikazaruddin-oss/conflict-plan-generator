@@ -13,19 +13,19 @@ def make_waypoint(lat, lon, alt, idx):
         "type": "SimpleItem"
     }
 
-# ✅ ADDED: Takeoff item (new function, no existing function changed)
-def make_takeoff(alt, idx):
-    return {
-        "AMSLAltAboveTerrain": 0.0,
-        "Altitude": alt,
-        "AltitudeMode": 1,
-        "autoContinue": True,
-        "command": 22,              # MAV_CMD_NAV_TAKEOFF
-        "doJumpId": idx,
-        "frame": 0,
-        "params": [0, 0, 0, 0, 0, 0, alt],
-        "type": "SimpleItem"
-    }
+# ADDED: Takeoff item
+#def make_takeoff(alt, idx):
+#   return {
+#        "AMSLAltAboveTerrain": 0.0,
+#        "Altitude": alt,
+#        "AltitudeMode": 1,
+#        "autoContinue": True,
+#        "command": 22,              # MAV_CMD_NAV_TAKEOFF
+#        "doJumpId": idx,
+#        "frame": 0,
+#        "params": [0, 0, 0, 0, 0, 0, alt],
+#        "type": "SimpleItem"
+#    }
 
 def write_plan_file(path, waypoints, home_position):
     data = {
@@ -38,11 +38,11 @@ def write_plan_file(path, waypoints, home_position):
             "hoverSpeed": 5,
             "items": [
                 # ✅ ADDED: Takeoff must be FIRST
-                make_takeoff(waypoints[0][2], 0),
+ #               make_takeoff(waypoints[0][2], 0),
 
                 # Existing waypoints (unchanged)
-                make_waypoint(waypoints[0][0], waypoints[0][1], waypoints[0][2], 1),
-                make_waypoint(waypoints[1][0], waypoints[1][1], waypoints[1][2], 2),
+                make_waypoint(waypoints[0][0], waypoints[0][1], waypoints[0][2], 0),
+                make_waypoint(waypoints[1][0], waypoints[1][1], waypoints[1][2], 1),
             ],
             "plannedHomePosition": list(home_position),
             "vehicleType": 2,
@@ -64,12 +64,12 @@ def write_waypoints_file(path, waypoints):
         f.write("QGC WPL 110\n")
 
         # ✅ ADDED: TAKEOFF command (index 0)
-        f.write(
-            f"0\t1\t0\t22\t0\t0\t0\t0\t0\t0\t{waypoints[0][2]:.2f}\t1\n"
-        )
+ #       f.write(
+ #           f"0\t1\t0\t22\t0\t0\t0\t0\t0\t0\t{waypoints[0][2]:.2f}\t1\n"
+ #       )
 
-        for i, (lat, lon, alt) in enumerate(waypoints, start=1):
-            current = 1 if i == 1 else 0
+        for i, (lat, lon, alt) in enumerate(waypoints):
+            current = 1 if i == 0 else 0
             frame = 0
             command = 16
             param1 = param2 = param3 = param4 = 0
