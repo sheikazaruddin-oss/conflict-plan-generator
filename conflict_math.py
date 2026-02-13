@@ -134,7 +134,15 @@ def compute_conflict_geometry(
     cpa_sep_horiz_m = math.hypot(r_tcpa_x, r_tcpa_y)
     cpa_sep_vert_m = abs(r_tcpa_z)
     cpa_sep_3d_m = math.sqrt(r_tcpa_x**2 + r_tcpa_y**2 + r_tcpa_z**2)
-
+    # ===== DEBUG PRINTS (ADD HERE) =====
+    print("OS CPA ALT:", os_cpa[2])
+    print("Target CPA ALT:", tgt_cpa[2])
+    print("Conflict DH Input:", conflict_dh_m)
+    print("Target Alt Offset Input:", target_alto_m)
+    print("Horizontal CPA Separation:", cpa_sep_horiz_m)
+    print("Vertical CPA Separation:", cpa_sep_vert_m)
+    print("3D CPA Separation:", cpa_sep_3d_m)
+# ===================================
     return {
         "os_start": os_start,
         "os_cpa": os_cpa,
