@@ -44,18 +44,18 @@ st.subheader("Ownership Aircraft Parameters")
 
 tcpa_sec = st.number_input("TCPA (s)", value=60.0)
 
-cpa_dist_ft = st.number_input("CPA Distance (ft)", value=656.17)  # 200m default
+cpa_dist_ft = st.number_input("CPA Distance (ft)", value=20) 
 
 os_lat = st.number_input("Ownership Latitude", value=37.618805, format="%.6f", step=0.000001)
 os_lon = st.number_input("Ownership Longitude", value=-122.375416, format="%.6f", step=0.000001)
 
-os_alt_ft = st.number_input("Ownership Altitude (ft)", value=164.0)  # 50m default
+os_alt_ft = st.number_input("Ownership Altitude (ft)", value=50)  # 50m default
 
 os_course = st.number_input("Ownership Course (deg)", value=90.0)
 
-os_speed_kt = st.number_input("Ownership Speed (kt)", value=38.88)  # 20 m/s default
+os_speed_kt = st.number_input("Ownership Speed (kt)", value=20)  # 20 default
 
-os_vspeed_fpm = st.number_input("Ownership Vertical Speed (ft/min)", value=0.0)
+os_vspeed_fpm = st.number_input("Ownership Vertical Speed (ft/min)", value=1)
 
 # ==============================
 # TARGET INPUTS (AVIATION UNITS)
@@ -63,11 +63,11 @@ os_vspeed_fpm = st.number_input("Ownership Vertical Speed (ft/min)", value=0.0)
 
 st.subheader("Target Aircraft Parameters")
 
-rel_speed_kt = st.number_input("Relative Speed (kt)", value=19.44)
+rel_speed_kt = st.number_input("Relative Speed (kt)", value=10)
 
-conflict_dh_ft = st.number_input("Conflict Relative Altitude (ft)", value=98.43)
+conflict_dh_ft = st.number_input("Conflict Relative Altitude (ft)", value=30)
 
-tgt_alt_offset_ft = st.number_input("Target Alt Offset (ft)", value=164.0)
+tgt_alt_offset_ft = st.number_input("Target Alt Offset (ft)", value=20)
 
 relative_heading = st.number_input("Relative Heading (deg)", value=95.0)
 
