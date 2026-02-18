@@ -1,4 +1,5 @@
 import math
+from units import m_to_ft
 
 
 def meters_to_latlon(lato_deg, lono_deg, dx_m, dy_m):
@@ -135,14 +136,14 @@ def compute_conflict_geometry(
     cpa_sep_vert_m = abs(r_tcpa_z)
     cpa_sep_3d_m = math.sqrt(r_tcpa_x**2 + r_tcpa_y**2 + r_tcpa_z**2)
     # ===== DEBUG PRINTS (ADD HERE) =====
-    print("OS CPA ALT:", os_cpa[2])
-    print("Target CPA ALT:", tgt_cpa[2])
-    print("Conflict DH Input:", conflict_dh_m)
+    print("OS CPA ALT (ft):", round(m_to_ft(os_cpa[2]), 3))
+    print("Target CPA ALT:", round(m_to_ft(tgt_cpa[2]), 3))
+    print("Conflict DH Input:", round(m_to_ft(conflict_dh_m), 3))
     print("Target Alt Offset Input:", target_alto_m)
-    print("Horizontal CPA Separation:", cpa_sep_horiz_m)
-    print("Vertical CPA Separation:", cpa_sep_vert_m)
-    print("3D CPA Separation:", cpa_sep_3d_m)
-# ===================================
+
+    print("Horizontal CPA Separation (ft):", round(m_to_ft(cpa_sep_horiz_m), 3))
+    print("Vertical CPA Separation (ft):", round(m_to_ft(cpa_sep_vert_m), 3))
+    print("3D CPA Separation (ft):", round(m_to_ft(cpa_sep_3d_m), 3))# ===================================
     return {
         "os_start": os_start,
         "os_cpa": os_cpa,
