@@ -46,8 +46,8 @@ tcpa_sec = st.number_input("TCPA (s)", value=60.0)
 
 cpa_dist_ft = st.number_input("CPA Distance (ft)", value=656.17)  # 200m default
 
-os_lat = st.number_input("Ownership Latitude", value=37.618805)
-os_lon = st.number_input("Ownership Longitude", value=-122.375416)
+os_lat = st.number_input("Ownership Latitude", value=37.618805, format="%.6f", step=0.000001)
+os_lon = st.number_input("Ownership Longitude", value=-122.375416, format="%.6f", step=0.000001)
 
 os_alt_ft = st.number_input("Ownership Altitude (ft)", value=164.0)  # 50m default
 
