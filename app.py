@@ -54,7 +54,7 @@ def main():
     parser.add_argument("--os-vspeed", type=float, required=True, help="Ownship vertical speed (ft/min)")
     parser.add_argument("--rel-speed", type=float, required=True, help="Target speed (knots)")
     parser.add_argument("--conflict-dh", type=float, required=True, help="Vertical separation (feet)")
-    parser.add_argument("--tgt-alto", type=float, default=0.0, help="Target altitude offset (feet)")
+    parser.add_argument("--tgt-alto", type=float, required=True, help="Target altitude offset (feet)")
     parser.add_argument("--relative-heading", type=float, required=True)
 
     args = parser.parse_args()
