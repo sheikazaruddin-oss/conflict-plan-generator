@@ -55,7 +55,7 @@ def compute_conflict_geometry(
     # 0 => target heading opposite ownship (head-on)
     # 180 => target same heading as ownship (overtaking)
     # ----------------------------
-    tgt_course_deg = (os_course_deg + 180.0 + (relative_heading_deg % 360.0)) % 360.0
+    tgt_course_deg = (os_course_deg + (relative_heading_deg % 360.0)) % 360.0
     tgt_course_rad = math.radians(tgt_course_deg)
 
     vx_tgt = rel_speed_mps * math.cos(tgt_course_rad)
