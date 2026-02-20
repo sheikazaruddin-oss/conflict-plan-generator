@@ -2,6 +2,7 @@ import argparse
 from conflict_math import compute_conflict_geometry
 from plan_writer import write_plan_file, write_waypoints_file, write_kml_file
 from units import ft_to_m, kt_to_mps, fpm_to_mps
+from validation_logger import save_validation_log
 import yaml
 
 
@@ -44,7 +45,7 @@ def main():
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--tcpa", type=float, required=True)
+    parser.add_argument("--tcpa", type=str, required=True, help="TCPA in mm:ss format")
     parser.add_argument("--cpa", type=float, required=True, help="CPA distance (feet)")
     parser.add_argument("--os-lat", type=float, required=True)
     parser.add_argument("--os-lon", type=float, required=True)
@@ -58,7 +59,28 @@ def main():
     parser.add_argument("--relative-heading", type=float, required=True)
 
     args = parser.parse_args()
-
+    
+    try:
+        minuites, seconds = map(int, args.tcpa.split(":"))
+        tcpa_sec = minuites * 60 + seconds
+    except:
+        raise ValueError("TCPA must be in mm:ss format")
+        
+    inputs_dict = {
+        "tcpa_sec": tcpa_sec,
+        "tcpa_mmss": args.tcpa,
+        "cpa_ft": args.cpa,
+        "os_lat_deg": args.os_lat,
+        "os_lon_deg": args.os_lon,
+        "os_alt_ft": args.os_alt,
+        "os_course_deg": args.os_course,
+        "os_speed_kt": args.os_speed,
+        "os_vspeed_fpm": args.os_vspeed,
+        "rel_speed_kt": args.rel_speed,
+        "conflict_dh_ft": args.conflict_dh,
+        "tgt_alto_ft": args.tgt_alto,
+        "relative_heading_deg": args.relative_heading
+}
     # 🔁 UNIT CONVERSIONS
     cpa_m = ft_to_m(args.cpa)
     os_alt_m = ft_to_m(args.os_alt)
@@ -69,7 +91,7 @@ def main():
     tgt_alto_m = ft_to_m(args.tgt_alto)
 
     points = compute_conflict_geometry(
-        tcpa_sec=args.tcpa,
+        tcpa_sec=tcpa_sec,
         cpa_horiz_m=cpa_m,
         os_lat_deg=args.os_lat,
         os_lon_deg=args.os_lon,
@@ -83,6 +105,9 @@ def main():
         relative_heading_deg=args.relative_heading
     )
 
+    
+    save_validation_log("scenario_log.json", inputs_dict, points, tcpa_sec)
+   
     home = points["os_start"]
 
     # Standard files
@@ -108,12 +133,15 @@ def main():
                     args.os_vspeed,
                     "ownship.waypoints")
 
+    # Use computed target start from geometry
+    tgt_start = points["tgt_start"]
+
     write_yaml_file("target.yaml", "TARGET01",
-                    home, args.os_course,
-                    args.rel_speed,
+                    tgt_start, # correct home (lat, lon, alt_m)
+                    points["tgt_course_deg"], # correct target course
+                    args.rel_speed, # already in knots
                     0.0,
                     "target.waypoints")
-
     print("✅ All files generated (.plan, .waypoints, .kml, .yaml)")
 
 

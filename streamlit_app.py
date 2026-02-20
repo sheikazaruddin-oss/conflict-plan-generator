@@ -5,7 +5,19 @@ from conflict_math import compute_conflict_geometry
 from plan_writer import write_plan_file, write_waypoints_file, write_kml_file
 from yaml_writer import write_yaml_file
 from units import ft_to_m, m_to_ft, kt_to_mps, mps_to_kt, fpm_to_mps
+from validation_logger import save_validation_log
 
+
+def mmss_to_sec(mmss: str) -> int:
+    mmss = mmss.strip()
+    parts = mmss.split(":")
+    if len(parts) != 2:
+        raise ValueError("TCPA must be in mm:ss format (example: 01:30)")
+    minutes = int(parts[0])
+    seconds = int(parts[1])
+    if minutes < 0 or seconds < 0 or seconds >= 60:
+        raise ValueError("Seconds must be between 0 and 59")
+    return minutes * 60 + seconds
 # ==============================
 # Logo
 # ==============================
@@ -42,7 +54,7 @@ st.title("✈️ Conflict Plan Generator")
 
 st.subheader("Ownership Aircraft Parameters")
 
-tcpa_sec = st.number_input("TCPA (s)", value=60.0)
+tcpa_mmss = st.text_input("TCPA (mm:ss)", value="01:00")
 
 cpa_dist_ft = st.number_input("CPA Distance (ft)", value=20) 
 
@@ -78,7 +90,7 @@ relative_heading = st.number_input("Relative Heading (deg)", value=95.0)
 if st.button("✅ Generate plan files"):
 
     try:
-
+        tcpa_sec = mmss_to_sec(tcpa_mmss)
         # ==============================
         # CONVERT TO INTERNAL UNITS
         # ==============================
@@ -109,6 +121,29 @@ if st.button("✅ Generate plan files"):
             conflict_dh_m=conflict_dh_m,
             target_alto_m=tgt_alt_offset_m,
             relative_heading_deg=relative_heading,
+        )
+
+        inputs_dict = {
+        "tcpa_mmss": tcpa_mmss,
+        "tcpa_sec": tcpa_sec,
+        "cpa_ft": cpa_dist_ft,
+        "os_lat_deg": os_lat,
+        "os_lon_deg": os_lon,
+        "os_alt_ft": os_alt_ft,
+        "os_course_deg": os_course,
+        "os_speed_kt": os_speed_kt,
+        "os_vspeed_fpm": os_vspeed_fpm,
+        "rel_speed_kt": rel_speed_kt,
+        "conflict_dh_ft": conflict_dh_ft,
+        "tgt_alto_ft": tgt_alt_offset_ft,
+        "relative_heading_deg": relative_heading,
+        }
+
+        save_validation_log(
+        "scenario_log.json",
+        inputs_dict,
+        points,
+        tcpa_sec
         )
 
         home = points["os_start"]
@@ -173,28 +208,41 @@ if st.button("✅ Generate plan files"):
         # ==============================
 
         with open("ownership.plan", "rb") as f:
+            st.markdown("---")
+            st.subheader(".PLAN FILES")
             st.download_button("Download Ownership Plan", f, file_name="ownership.plan")
 
         with open("target.plan", "rb") as f:
             st.download_button("Download Target Plan", f, file_name="target.plan")
 
         with open("ownership.waypoints", "rb") as f:
+            st.markdown("---")
+            st.subheader(".WAYPOINT FILES")
             st.download_button("Download Ownership Waypoints", f, file_name="ownership.waypoints")
 
         with open("target.waypoints", "rb") as f:
             st.download_button("Download Target Waypoints", f, file_name="target.waypoints")
 
         with open("ownership.kml", "rb") as f:
+            st.markdown("---")
+            st.subheader(".KML FILES")
             st.download_button("Download Ownership KML", f, file_name="ownership.kml")
 
         with open("target.kml", "rb") as f:
             st.download_button("Download Target KML", f, file_name="target.kml")
 
         with open("ownership.yaml", "rb") as f:
+            st.markdown("---")
+            st.subheader(".YAML FILES")
             st.download_button("Download Ownership YAML", f, file_name="ownership.yaml")
 
         with open("target.yaml", "rb") as f:
             st.download_button("Download Target YAML", f, file_name="target.yaml")
+            
+        with open("scenario_log.json", "rb") as f:
+            st.markdown("---")
+            st.subheader("VALIDATION LOG")
+            st.download_button("Download Validation Log", f, file_name="scenario_log.json", mime="application/json")
 
         st.success("✅ All files generated successfully!")
 

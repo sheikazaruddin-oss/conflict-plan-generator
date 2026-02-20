@@ -154,5 +154,19 @@ def compute_conflict_geometry(
         "tgt_course_deg": tgt_course_deg,
         "cpa_sep_horiz_m": cpa_sep_horiz_m,
         "cpa_sep_vert_m": cpa_sep_vert_m,
-        "cpa_sep_3d_m": cpa_sep_3d_m
+        "cpa_sep_3d_m": cpa_sep_3d_m,
+        "os_speed_mps": os_speed_mps,
+        "os_vspeed_mps": os_vspeed_mps,
+        "os_course_deg": os_course_deg,
+
+        "tgt_speed_mps": rel_speed_mps,
+        "tgt_course_deg": tgt_course_deg,
+
+        "vx_os": vx_os,
+        "vy_os": vy_os,
+        "vz_os": vz_os,
+
+        "vx_tgt": vx_tgt,
+        "vy_tgt": vy_tgt,
+        "vz_tgt": vz_tgt
     }
