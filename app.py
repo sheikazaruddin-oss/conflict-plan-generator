@@ -6,7 +6,7 @@ from validation_logger import save_validation_log
 import yaml
 
 
-def write_yaml_file(filename, callsign, home, heading_deg,
+def write_yaml_file(filename, callsign, sysid, home, heading_deg,
                     speed_kt, vs_fpm, waypoints_file):
 
     lat, lon, alt_m = home
@@ -16,6 +16,7 @@ def write_yaml_file(filename, callsign, home, heading_deg,
         "version": 1,
         "vehicle": {
             "callsign": callsign
+            "sysid": sysid
         },
         "sitl": {
             "home": {
@@ -128,6 +129,7 @@ def main():
 
     # YAML generation
     write_yaml_file("ownship.yaml", "OWNSHIP01",
+                    1, 
                     home, args.os_course,
                     args.os_speed,
                     args.os_vspeed,
@@ -137,6 +139,7 @@ def main():
     tgt_start = points["tgt_start"]
 
     write_yaml_file("target.yaml", "TARGET01",
+                    2,
                     tgt_start, # correct home (lat, lon, alt_m)
                     points["tgt_course_deg"], # correct target course
                     args.rel_speed, # already in knots
