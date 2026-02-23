@@ -34,6 +34,7 @@ initial_conditions:
   course_heading_deg: {course_deg}
   ground_speed_kt: {ground_speed_kt}
   vertical_speed_fpm: {vertical_speed_fpm}
+  start_mode : midflight
 
 mission:
   waypoints_file: "{waypoints_file}"
