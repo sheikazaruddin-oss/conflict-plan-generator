@@ -15,7 +15,7 @@ def write_yaml_file(filename, callsign, sysid, home, heading_deg,
     data = {
         "version": 1,
         "vehicle": {
-            "callsign": callsign
+            "callsign": callsign,
             "sysid": sysid
         },
         "sitl": {

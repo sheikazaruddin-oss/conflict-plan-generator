@@ -9,7 +9,8 @@ def write_yaml_file(
     course_deg,
     ground_speed_kt,
     vertical_speed_fpm,
-    waypoints_file
+    waypoints_file,
+    sysid
 ):
 
     content = f"""# Vehicle initialization file for multi-SITL runner
@@ -23,6 +24,7 @@ version: 1
 
 vehicle:
   callsign: "{callsign}"
+  sysid: {sysid}
 
 sitl:
   home:
@@ -34,7 +36,7 @@ initial_conditions:
   course_heading_deg: {course_deg}
   ground_speed_kt: {ground_speed_kt}
   vertical_speed_fpm: {vertical_speed_fpm}
-  start_mode : midflight
+  start_mode : "midflight"
 
 mission:
   waypoints_file: "{waypoints_file}"

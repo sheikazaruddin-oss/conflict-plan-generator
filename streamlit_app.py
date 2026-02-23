@@ -179,6 +179,7 @@ if st.button("✅ Generate plan files"):
         write_yaml_file(
             path="ownership.yaml",
             callsign="OWN01",
+            sysid=1,
             lat_deg=os_lat,
             lon_deg=os_lon,
             alt_ft=os_alt_ft,
@@ -194,6 +195,7 @@ if st.button("✅ Generate plan files"):
         write_yaml_file(
             path="target.yaml",
             callsign="TGT01",
+            sysid=2,
             lat_deg=tgt_start[0],
             lon_deg=tgt_start[1],
             alt_ft=tgt_alt_ft,
