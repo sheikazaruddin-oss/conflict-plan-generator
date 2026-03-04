@@ -4,42 +4,7 @@ from plan_writer import write_plan_file, write_waypoints_file, write_kml_file
 from units import ft_to_m, kt_to_mps, fpm_to_mps
 from validation_logger import save_validation_log
 import yaml
-
-
-def write_yaml_file(filename, callsign, sysid, home, heading_deg,
-                    speed_kt, vs_fpm, waypoints_file):
-
-    lat, lon, alt_m = home
-    alt_ft = alt_m / 0.3048
-
-    data = {
-        "version": 1,
-        "vehicle": {
-            "callsign": callsign,
-            "sysid": sysid
-        },
-        "sitl": {
-            "home": {
-                "lat_deg": lat,
-                "lon_deg": lon,
-                "alt_ft": round(alt_ft, 2)
-            }
-        },
-        "initial_conditions": {
-            "course_heading_deg": heading_deg,
-            "ground_speed_kt": speed_kt,
-            "vertical_speed_fpm": vs_fpm
-        },
-        "mission": {
-            "waypoints_file": waypoints_file,
-            "starting_waypoint_index": 0,
-            "auto_set_mode": "AUTO",
-            "start_automatically": True
-        }
-    }
-
-    with open(filename, "w") as f:
-        yaml.dump(data, f, sort_keys=False)
+from yaml_writer import write_yaml_file
 
 
 def main():
@@ -128,23 +93,35 @@ def main():
                    [points["tgt_start"], points["tgt_cpa"]])
 
     # YAML generation
-    write_yaml_file("ownship.yaml", "OWNSHIP01",
-                    1, 
-                    home, args.os_course,
-                    args.os_speed,
-                    args.os_vspeed,
-                    "ownship.waypoints")
-
+    write_yaml_file(
+        path="ownship.yaml",
+        callsign="OWN01",
+        sysid=1,
+        lat_deg=points["os_start"][0],
+        lon_deg=points["os_start"][1],
+        alt_ft=points["os_start"][2],
+        course_deg=args.os_course,
+        ground_speed_kt=args.os_speed,
+        vertical_speed_fpm=args.os_vspeed,
+        waypoints_file="ownership.waypoints",
+        
+    )
     # Use computed target start from geometry
     tgt_start = points["tgt_start"]
 
-    write_yaml_file("target.yaml", "TARGET01",
-                    2,
-                    tgt_start, # correct home (lat, lon, alt_m)
-                    points["tgt_course_deg"], # correct target course
-                    args.rel_speed, # already in knots
-                    0.0,
-                    "target.waypoints")
+    write_yaml_file(
+        path="target.yaml",
+        callsign="TGT01",
+        sysid=2,
+        lat_deg=points["tgt_start"][0],
+        lon_deg=points["tgt_start"][1],
+        alt_ft=points["tgt_start"][2],
+        course_deg=args.relative_heading,
+        ground_speed_kt=args.rel_speed,
+        vertical_speed_fpm=args.os_vspeed,
+        waypoints_file="target.waypoints",
+    )
+    
     print("✅ All files generated (.plan, .waypoints, .kml, .yaml)")
 
 
