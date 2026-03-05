@@ -36,8 +36,8 @@ def compute_conflict_geometry(
     # ----------------------------
     os_course_rad = math.radians(os_course_deg % 360.0)
 
-    vx_os = os_speed_mps * math.cos(os_course_rad)
-    vy_os = os_speed_mps * math.sin(os_course_rad)
+    vx_os = os_speed_mps * math.sin(os_course_rad)
+    vy_os = os_speed_mps * math.cos(os_course_rad)
     vz_os = os_vspeed_mps
 
     dx_os = vx_os * tcpa_sec
@@ -59,8 +59,8 @@ def compute_conflict_geometry(
     tgt_course_deg = (os_course_deg + 180.0 - (relative_heading_deg % 360.0)) % 360.0
     tgt_course_rad = math.radians(tgt_course_deg)
 
-    vx_tgt = rel_speed_mps * math.cos(tgt_course_rad)
-    vy_tgt = rel_speed_mps * math.sin(tgt_course_rad)
+    vx_tgt = rel_speed_mps * math.sin(tgt_course_rad)
+    vy_tgt = rel_speed_mps * math.cos(tgt_course_rad)
 
     # ----------------------------
     # Vertical consistency fix (key change):
@@ -133,11 +133,16 @@ def compute_conflict_geometry(
     tgt_start_alt = os_alt_m + r0_z
     tgt_start = (tgt_start_lat, tgt_start_lon, tgt_start_alt)
 
-    # Target CPA = target start + target motion
-    tgt_cpa_lat, tgt_cpa_lon = meters_to_latlon(tgt_start_lat, tgt_start_lon, dx_tgt, dy_tgt)
+    # Target CPA in local ENU meters relative to ownship origin
+    tgt_cpa_dx = r0_x + dx_tgt
+    tgt_cpa_dy = r0_y + dy_tgt
+
+    # Convert using OWN origin (same reference as ownship CPA)
+    tgt_cpa_lat, tgt_cpa_lon = meters_to_latlon(os_lat_deg, os_lon_deg, tgt_cpa_dx, tgt_cpa_dy)
+
     tgt_alt_cpa = tgt_start_alt + dz_tgt
     tgt_cpa = (tgt_cpa_lat, tgt_cpa_lon, tgt_alt_cpa)
-
+    
     # ----------------------------
     # Debug/validation metrics at CPA
     # r(tcpa) = r0 + v_rel*tcpa  (should match r_cpa)
