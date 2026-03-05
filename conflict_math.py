@@ -36,8 +36,8 @@ def compute_conflict_geometry(
     # ----------------------------
     os_course_rad = math.radians(os_course_deg % 360.0)
 
-    vx_os = os_speed_mps * math.sin(os_course_rad)
-    vy_os = os_speed_mps * math.cos(os_course_rad)
+    vx_os = os_speed_mps * math.cos(os_course_rad)
+    vy_os = os_speed_mps * math.sin(os_course_rad)
     vz_os = os_vspeed_mps
 
     dx_os = vx_os * tcpa_sec
@@ -51,47 +51,32 @@ def compute_conflict_geometry(
     # relative_heading_deg meaning (your definition):
     # 0=head-on, 90=crossing from right, 180=overtaking, 270=crossing from left
     #
-    # Correct mapping:
-    # 0   -> target heading opposite ownship (os + 180)
-    # 180 -> target heading same as ownship (os)
-    # So: tgt = os + (180 - relative_heading)
+    # This mapping makes:
+    # 0 => target heading opposite ownship (head-on)
+    # 180 => target same heading as ownship (overtaking)
     # ----------------------------
     tgt_course_deg = (os_course_deg + (relative_heading_deg % 360.0)) % 360.0
     tgt_course_rad = math.radians(tgt_course_deg)
 
-    vx_tgt = rel_speed_mps * math.sin(tgt_course_rad)
-    vy_tgt = rel_speed_mps * math.cos(tgt_course_rad)
+    vx_tgt = rel_speed_mps * math.cos(tgt_course_rad)
+    vy_tgt = rel_speed_mps * math.sin(tgt_course_rad)
+    vz_tgt = 0.0  # keep as 0 unless you later add target vertical speed input
 
-    # ----------------------------
-    # Vertical consistency fix (key change):
-    # target_alto_m = target vertical offset at t=0  (target - ownship)
-    # conflict_dh_m = desired vertical separation at CPA (target - ownship at t=tcpa)
-    #
-    # Solve for vz_tgt so BOTH are true:
-    # r_z(t) = target_alto_m + (vz_tgt - vz_os)*t
-    # r_z(tcpa) = conflict_dh_m
-    # => vz_tgt = vz_os + (conflict_dh_m - target_alto_m)/tcpa_sec
-    # ----------------------------
-    if abs(tcpa_sec) < 1e-9:
-        # Degenerate case: tcpa_sec ~ 0, can't solve slope.
-        # Best effort: keep target vertical speed same as ownship.
-        vz_tgt = vz_os
-    else:
-        vz_tgt = vz_os + ((conflict_dh_m - target_alto_m) / tcpa_sec)
-
-    dz_tgt = vz_tgt * tcpa_sec
     dx_tgt = vx_tgt * tcpa_sec
     dy_tgt = vy_tgt * tcpa_sec
+    dz_tgt = vz_tgt * tcpa_sec
 
     # ----------------------------
-    # REALISTIC CPA SETUP:
+    # REALISTIC CPA SETUP (key change):
+    #
     # We want CPA at t = tcpa_sec with:
     #   horizontal separation magnitude = cpa_horiz_m
     #   vertical separation = conflict_dh_m
     #
     # For CPA at tcpa_sec, the relative position vector at CPA must be
-    # perpendicular to relative velocity (in horizontal plane):
-    # r_cpa . v_rel = 0 (horizontal)
+    # perpendicular to relative velocity (in the horizontal plane).
+    #
+    # r_cpa · v_rel = 0  (horizontal)
     # ----------------------------
     vx_rel = vx_tgt - vx_os
     vy_rel = vy_tgt - vy_os
@@ -99,11 +84,13 @@ def compute_conflict_geometry(
 
     vrel_h = math.hypot(vx_rel, vy_rel)
 
-    # Unit vector perpendicular to v_rel (rotate by +90 deg)
+    # If relative horizontal speed is ~0, CPA is undefined in horizontal plane.
+    # Fallback: place separation along +Y.
     if vrel_h < 1e-6:
         ux_perp = 0.0
         uy_perp = 1.0
     else:
+        # unit vector perpendicular to v_rel (rotate by +90 degrees)
         ux_perp = -vy_rel / vrel_h
         uy_perp = vx_rel / vrel_h
 
@@ -112,14 +99,11 @@ def compute_conflict_geometry(
     r_cpa_y = uy_perp * cpa_horiz_m
     r_cpa_z = conflict_dh_m
 
-    # Back-compute target initial relative position (x,y) so that at tcpa_sec it becomes r_cpa:
-    # r(tcpa) = r0 + v_rel * tcpa  =>  r0 = r(tcpa) - v_rel * tcpa
+    # Back-compute target initial relative position so that at tcpa_sec it becomes r_cpa:
+    # r(tcpa) = r0 + v_rel * tcpa  => r0 = r(tcpa) - v_rel * tcpa
     r0_x = r_cpa_x - vx_rel * tcpa_sec
     r0_y = r_cpa_y - vy_rel * tcpa_sec
-
-    # IMPORTANT:
-    # We force the initial vertical offset to be target_alto_m by definition.
-    r0_z = target_alto_m
+    r0_z = r_cpa_z - vz_rel * tcpa_sec
 
     # ----------------------------
     # Build start + CPA positions in lat/lon/alt
@@ -130,23 +114,20 @@ def compute_conflict_geometry(
 
     # Target start is offset from ownship start by r0 (in meters)
     tgt_start_lat, tgt_start_lon = meters_to_latlon(os_lat_deg, os_lon_deg, r0_x, r0_y)
-    tgt_start_alt = os_alt_m + r0_z
+    tgt_start_alt = os_alt_m + r0_z + target_alto_m
     tgt_start = (tgt_start_lat, tgt_start_lon, tgt_start_alt)
 
-    # Target CPA in local ENU meters relative to ownship origin
-    tgt_cpa_dx = r0_x + dx_tgt
-    tgt_cpa_dy = r0_y + dy_tgt
-
-    # Convert using OWN origin (same reference as ownship CPA)
-    tgt_cpa_lat, tgt_cpa_lon = meters_to_latlon(os_lat_deg, os_lon_deg, tgt_cpa_dx, tgt_cpa_dy)
-
+    # Target CPA = target start + target motion
+    tgt_cpa_lat, tgt_cpa_lon = meters_to_latlon(tgt_start_lat, tgt_start_lon, dx_tgt, dy_tgt)
     tgt_alt_cpa = tgt_start_alt + dz_tgt
     tgt_cpa = (tgt_cpa_lat, tgt_cpa_lon, tgt_alt_cpa)
-    
+
     # ----------------------------
     # Debug/validation metrics at CPA
-    # r(tcpa) = r0 + v_rel*tcpa  (should match r_cpa)
+    # (added keys; existing keys preserved)
     # ----------------------------
+    # Relative separation at CPA in local meters:
+    # r(tcpa) = r0 + v_rel*tcpa => should equal r_cpa
     r_tcpa_x = r0_x + vx_rel * tcpa_sec
     r_tcpa_y = r0_y + vy_rel * tcpa_sec
     r_tcpa_z = r0_z + vz_rel * tcpa_sec
@@ -154,40 +135,38 @@ def compute_conflict_geometry(
     cpa_sep_horiz_m = math.hypot(r_tcpa_x, r_tcpa_y)
     cpa_sep_vert_m = abs(r_tcpa_z)
     cpa_sep_3d_m = math.sqrt(r_tcpa_x**2 + r_tcpa_y**2 + r_tcpa_z**2)
-
-    # DEBUG PRINTS (safe to keep)
+    # ===== DEBUG PRINTS (ADD HERE) =====
     print("OS CPA ALT (ft):", round(m_to_ft(os_cpa[2]), 3))
-    print("Target CPA ALT (ft):", round(m_to_ft(tgt_cpa[2]), 3))
-    print("Conflict DH Input (ft):", round(m_to_ft(conflict_dh_m), 3))
-    print("Target Alt Offset Input (ft):", round(m_to_ft(target_alto_m), 3))
+    print("Target CPA ALT:", round(m_to_ft(tgt_cpa[2]), 3))
+    print("Conflict DH Input:", round(m_to_ft(conflict_dh_m), 3))
+    print("Target Alt Offset Input:", target_alto_m)
+
     print("Horizontal CPA Separation (ft):", round(m_to_ft(cpa_sep_horiz_m), 3))
     print("Vertical CPA Separation (ft):", round(m_to_ft(cpa_sep_vert_m), 3))
-    print("3D CPA Separation (ft):", round(m_to_ft(cpa_sep_3d_m), 3))
+    print("3D CPA Separation (ft):", round(m_to_ft(cpa_sep_3d_m), 3))# ===================================
+    return {
+        "os_start": os_start,
+        "os_cpa": os_cpa,
+        "tgt_start": tgt_start,
+        "tgt_cpa": tgt_cpa,
 
-    return (
-        {
-            "os_start": os_start,
-            "os_cpa": os_cpa,
-            "tgt_start": tgt_start,
-            "tgt_cpa": tgt_cpa,
+        # ✅ Added debug outputs (safe additions)
+        "tgt_course_deg": tgt_course_deg,
+        "cpa_sep_horiz_m": cpa_sep_horiz_m,
+        "cpa_sep_vert_m": cpa_sep_vert_m,
+        "cpa_sep_3d_m": cpa_sep_3d_m,
+        "os_speed_mps": os_speed_mps,
+        "os_vspeed_mps": os_vspeed_mps,
+        "os_course_deg": os_course_deg,
 
-            # Added debug outputs (safe additions)
-            "tgt_course_deg": tgt_course_deg,
-            "cpa_sep_horiz_m": cpa_sep_horiz_m,
-            "cpa_sep_vert_m": cpa_sep_vert_m,
-            "cpa_sep_3d_m": cpa_sep_3d_m,
-            "os_speed_mps": os_speed_mps,
-            "os_vspeed_mps": os_vspeed_mps,
-            "os_course_deg": os_course_deg,
+        "tgt_speed_mps": rel_speed_mps,
+        "tgt_course_deg": tgt_course_deg,
 
-            "tgt_speed_mps": rel_speed_mps,
-            "tgt_course_deg": tgt_course_deg,
+        "vx_os": vx_os,
+        "vy_os": vy_os,
+        "vz_os": vz_os,
 
-            "vx_os": vx_os,
-            "vy_os": vy_os,
-            "vz_os": vz_os,
-            "vx_tgt": vx_tgt,
-            "vy_tgt": vy_tgt,
-            "vz_tgt": vz_tgt,
-        }
-    )
+        "vx_tgt": vx_tgt,
+        "vy_tgt": vy_tgt,
+        "vz_tgt": vz_tgt
+    }
