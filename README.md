@@ -82,7 +82,7 @@ Method 1 — Streamlit Web Application
 You can run the generator using the Streamlit web interface.
 
 Streamlit Application Link:
-https://conflict-plan-generator-myvqvbqxz5r3skenjfd2fj.streamlit.app/
+[https://conflict-plan-generator-myvqvbqxz5r3skenjfd2fj.streamlit.app/](https://conflict-plan-generator-myvvqbqxz5r3skenjfd2fj.streamlit.app/)
 
 Steps:
 
@@ -171,6 +171,7 @@ Output includes:
 - Minimum separation observed
 - TCPA error
 - CPA separation error
+
 
 
 
