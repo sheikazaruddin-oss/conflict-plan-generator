@@ -98,14 +98,16 @@ Method 2 — Command Line Interface (CLI)
 
 Step 1 — Create a Working Folder
 
+```
 mkdir conflict_plan_generator
 cd conflict_plan_generator
-
+```
 
 Step 2 — Clone the Repository
 
+```
 git clone https://github.com/sheikazaruddin-oss/conflict-plan-generator.git
-
+```
 
 Step 3 — Open Terminal
 
@@ -116,8 +118,9 @@ Use either:
 
 Step 4 — Run the Generator
 
+```
 python app.py --tcpa 01:00 --cpa 20 --os-lat 37.618805 --os-lon -122.375416 --os-alt 50 --os-course 90 --os-speed 20 --os-vspeed 1 --rel-speed 10 --conflict-dh 30 --tgt-alto 100 --relative-heading 95
-
+```
 
 Step 5 — Output Files
 
@@ -142,7 +145,9 @@ During simulation, telemetry can be recorded using the provided logger.
 
 Run:
 
+```
 python telemetry_logger.py --mcast-ip 0.0.0.0 --port 14550 --log-file telemetry_log.json
+```
 
 This script will:
 
@@ -159,7 +164,9 @@ Once telemetry has been recorded, validation can be performed.
 
 Run:
 
+```
 python validate_accuracy.py --scenario scenario_log.json --telemetry telemetry_log.json
+```
 
 The validation script compares:
 
@@ -171,6 +178,7 @@ Output includes:
 - Minimum separation observed
 - TCPA error
 - CPA separation error
+
 
 
 
