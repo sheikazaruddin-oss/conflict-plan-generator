@@ -129,13 +129,21 @@ Step 5 — Output Files
 All generated files will appear in the same folder:
 
 ownship.plan
+
 target.plan
+
 ownship.waypoints
+
 target.waypoints
+
 ownship.kml
+
 target.kml
+
 ownship.yaml
+
 target.yaml
+
 scenario_log.json
 
 
@@ -180,6 +188,7 @@ Output includes:
 - Minimum separation observed
 - TCPA error
 - CPA separation error
+
 
 
 
