@@ -30,7 +30,7 @@ The application generates the following files:
 Input Parameters
 ------------------------------------------------------------
 
-Encounter Geometry
+**Encounter Geometry**
 
 TCPA (mm:ss):
 Time to Closest Point of Approach
@@ -39,7 +39,8 @@ CPA Distance (ft):
 Horizontal separation between Ownship and Target at CPA
 
 
-Ownship Parameters
+
+**Ownship Parameters**
 
 Ownship Latitude (deg):
 Initial latitude of ownship
@@ -60,7 +61,8 @@ Ownship Vertical Speed (ft/min):
 Vertical climb/descent rate
 
 
-Target Aircraft Parameters
+
+**Target Aircraft Parameters**
 
 Relative Speed (kt):
 Target speed relative to ownship
@@ -178,6 +180,7 @@ Output includes:
 - Minimum separation observed
 - TCPA error
 - CPA separation error
+
 
 
 
