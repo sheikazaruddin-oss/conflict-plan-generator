@@ -104,7 +104,7 @@ cd conflict_plan_generator
 
 Step 2 — Clone the Repository
 
-git clone https://github.com/<your-repository>.git
+git clone https://github.com/sheikazaruddin-oss/conflict-plan-generator.git
 
 
 Step 3 — Open Terminal
@@ -171,6 +171,7 @@ Output includes:
 - Minimum separation observed
 - TCPA error
 - CPA separation error
+
 
 
 
