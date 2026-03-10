@@ -103,7 +103,7 @@ def main():
         course_deg=args.os_course,
         ground_speed_kt=args.os_speed,
         vertical_speed_fpm=args.os_vspeed,
-        waypoints_file="ownership.waypoints",
+        waypoints_file="ownship.waypoints",
         
     )
     # Use computed target start from geometry

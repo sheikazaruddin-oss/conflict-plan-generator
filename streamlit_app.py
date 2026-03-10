@@ -49,25 +49,25 @@ st.set_page_config(page_title="Conflict Plan Generator")
 st.title("✈️ Conflict Plan Generator")
 
 # ==============================
-# OWNERSHIP INPUTS (AVIATION UNITS)
+# Ownship INPUTS (AVIATION UNITS)
 # ==============================
 
-st.subheader("Ownership Aircraft Parameters")
+st.subheader("Ownship Aircraft Parameters")
 
 tcpa_mmss = st.text_input("TCPA (mm:ss)", value="01:00")
 
 cpa_dist_ft = st.number_input("CPA Distance (ft)", value=20) 
 
-os_lat = st.number_input("Ownership Latitude", value=37.618805, format="%.6f", step=0.000001)
-os_lon = st.number_input("Ownership Longitude", value=-122.375416, format="%.6f", step=0.000001)
+os_lat = st.number_input("Ownship Latitude", value=37.618805, format="%.6f", step=0.000001)
+os_lon = st.number_input("Ownship Longitude", value=-122.375416, format="%.6f", step=0.000001)
 
-os_alt_ft = st.number_input("Ownership Altitude (ft)", value=50)  # 50m default
+os_alt_ft = st.number_input("Ownship Altitude (ft)", value=50)  # 50m default
 
-os_course = st.number_input("Ownership Course (deg)", value=90.0)
+os_course = st.number_input("Ownship Course (deg)", value=90.0)
 
-os_speed_kt = st.number_input("Ownership Speed (kt)", value=20)  # 20 default
+os_speed_kt = st.number_input("Ownship Speed (kt)", value=20)  # 20 default
 
-os_vspeed_fpm = st.number_input("Ownership Vertical Speed (ft/min)", value=1)
+os_vspeed_fpm = st.number_input("Ownship Vertical Speed (ft/min)", value=1)
 
 # ==============================
 # TARGET INPUTS (AVIATION UNITS)
@@ -152,7 +152,7 @@ if st.button("✅ Generate plan files"):
         # FILE GENERATION
         # ==============================
 
-        write_plan_file("ownership.plan",
+        write_plan_file("Ownship.plan",
                         [points["os_start"], points["os_cpa"]],
                         home)
 
@@ -160,13 +160,13 @@ if st.button("✅ Generate plan files"):
                         [points["tgt_start"], points["tgt_cpa"]],
                         home)
 
-        write_waypoints_file("ownership.waypoints",
+        write_waypoints_file("Ownship.waypoints",
                              [points["os_start"], points["os_cpa"]])
 
         write_waypoints_file("target.waypoints",
                              [points["tgt_start"], points["tgt_cpa"]])
 
-        write_kml_file("ownership.kml",
+        write_kml_file("Ownship.kml",
                        [points["os_start"], points["os_cpa"]])
 
         write_kml_file("target.kml",
@@ -177,7 +177,7 @@ if st.button("✅ Generate plan files"):
         # ==============================
 
         write_yaml_file(
-            path="ownership.yaml",
+            path="Ownship.yaml",
             callsign="OWN01",
             sysid=1,
             lat_deg=os_lat,
@@ -186,7 +186,7 @@ if st.button("✅ Generate plan files"):
             course_deg=os_course,
             ground_speed_kt=os_speed_kt,
             vertical_speed_fpm=os_vspeed_fpm,
-            waypoints_file="ownership.waypoints"
+            waypoints_file="Ownship.waypoints"
         )
 
         tgt_start = points["tgt_start"]
@@ -209,34 +209,34 @@ if st.button("✅ Generate plan files"):
         # DOWNLOAD BUTTONS
         # ==============================
 
-        with open("ownership.plan", "rb") as f:
+        with open("Ownship.plan", "rb") as f:
             st.markdown("---")
             st.subheader(".PLAN FILES")
-            st.download_button("Download Ownership Plan", f, file_name="ownership.plan")
+            st.download_button("Download Ownship Plan", f, file_name="Ownship.plan")
 
         with open("target.plan", "rb") as f:
             st.download_button("Download Target Plan", f, file_name="target.plan")
 
-        with open("ownership.waypoints", "rb") as f:
+        with open("Ownship.waypoints", "rb") as f:
             st.markdown("---")
             st.subheader(".WAYPOINT FILES")
-            st.download_button("Download Ownership Waypoints", f, file_name="ownership.waypoints")
+            st.download_button("Download Ownship Waypoints", f, file_name="Ownship.waypoints")
 
         with open("target.waypoints", "rb") as f:
             st.download_button("Download Target Waypoints", f, file_name="target.waypoints")
 
-        with open("ownership.kml", "rb") as f:
+        with open("Ownship.kml", "rb") as f:
             st.markdown("---")
             st.subheader(".KML FILES")
-            st.download_button("Download Ownership KML", f, file_name="ownership.kml")
+            st.download_button("Download Ownship KML", f, file_name="Ownship.kml")
 
         with open("target.kml", "rb") as f:
             st.download_button("Download Target KML", f, file_name="target.kml")
 
-        with open("ownership.yaml", "rb") as f:
+        with open("Ownship.yaml", "rb") as f:
             st.markdown("---")
             st.subheader(".YAML FILES")
-            st.download_button("Download Ownership YAML", f, file_name="ownership.yaml")
+            st.download_button("Download Ownship YAML", f, file_name="Ownship.yaml")
 
         with open("target.yaml", "rb") as f:
             st.download_button("Download Target YAML", f, file_name="target.yaml")
