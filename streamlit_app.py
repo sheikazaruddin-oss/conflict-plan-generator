@@ -211,38 +211,78 @@ if st.button("✅ Generate plan files"):
         # DOWNLOAD BUTTONS
         # ==============================
 
-        with open("Ownship.plan", "rb") as f:
-            st.markdown("---")
-            st.subheader(".PLAN FILES")
-            st.download_button("Download Ownship Plan", f, file_name="Ownship.plan")
+        import os
+        import zipfile
+        import io
 
-        with open("target.plan", "rb") as f:
-            st.download_button("Download Target Plan", f, file_name="target.plan")
+        st.markdown("---")
 
-        with open("Ownship.waypoints", "rb") as f:
-            st.markdown("---")
-            st.subheader(".WAYPOINT FILES")
-            st.download_button("Download Ownship Waypoints", f, file_name="Ownship.waypoints")
+        # ------------------------------
+        # PLAN FILES
+        # ------------------------------
+        st.subheader(".PLAN FILES")
 
-        with open("target.waypoints", "rb") as f:
-            st.download_button("Download Target Waypoints", f, file_name="target.waypoints")
+        if os.path.exists("ownship.plan") and os.path.exists("target.plan"):
 
-        with open("Ownship.kml", "rb") as f:
-            st.markdown("---")
-            st.subheader(".KML FILES")
-            st.download_button("Download Ownship KML", f, file_name="Ownship.kml")
+            plan_zip = io.BytesIO()
 
-        with open("target.kml", "rb") as f:
-            st.download_button("Download Target KML", f, file_name="target.kml")
+            with zipfile.ZipFile(plan_zip, "w") as z:
+                z.write("ownship.plan")
+                z.write("target.plan")
 
-        with open("Ownship.yaml", "rb") as f:
-            st.markdown("---")
-            st.subheader(".YAML FILES")
-            st.download_button("Download Ownship YAML", f, file_name="Ownship.yaml")
+            st.download_button(
+                label="Download Plan Files",
+                data=plan_zip.getvalue(),
+                file_name="plan_files.zip",
+                mime="application/zip"
+            )
 
-        with open("target.yaml", "rb") as f:
-            st.download_button("Download Target YAML", f, file_name="target.yaml")
-            
+        else:
+            st.warning("Generate plan files first.")
+
+
+# ------------------------------
+# WAYPOINT FILES
+# ------------------------------
+st.markdown("---")
+st.subheader(".WAYPOINT FILES")
+
+if os.path.exists("ownship.waypoints") and os.path.exists("target.waypoints"):
+
+    waypoint_zip = io.BytesIO()
+
+    with zipfile.ZipFile(waypoint_zip, "w") as z:
+        z.write("ownship.waypoints")
+        z.write("target.waypoints")
+
+    st.download_button(
+        label="Download Waypoint Files",
+        data=waypoint_zip.getvalue(),
+        file_name="waypoint_files.zip",
+        mime="application/zip"
+    )
+
+
+# ------------------------------
+# KML FILES
+# ------------------------------
+st.markdown("---")
+st.subheader(".KML FILES")
+
+if os.path.exists("ownship.kml") and os.path.exists("target.kml"):
+
+    kml_zip = io.BytesIO()
+
+    with zipfile.ZipFile(kml_zip, "w") as z:
+        z.write("ownship.kml")
+        z.write("target.kml")
+
+    st.download_button(
+        label="Download KML Files",
+        data=kml_zip.getvalue(),
+        file_name="kml_files.zip",
+        mime="application/zip"
+    )            
         with open("scenario_log.json", "rb") as f:
             st.markdown("---")
             st.subheader("VALIDATION LOG")
