@@ -241,48 +241,49 @@ if st.button("✅ Generate plan files"):
             st.warning("Generate plan files first.")
 
 
-# ------------------------------
-# WAYPOINT FILES
-# ------------------------------
-st.markdown("---")
-st.subheader(".WAYPOINT FILES")
+        # ------------------------------
+        # WAYPOINT FILES
+        # ------------------------------
+        st.markdown("---")
+        st.subheader(".WAYPOINT FILES")
 
-if os.path.exists("ownship.waypoints") and os.path.exists("target.waypoints"):
+        if os.path.exists("ownship.waypoints") and os.path.exists("target.waypoints"):
 
-    waypoint_zip = io.BytesIO()
+            waypoint_zip = io.BytesIO()
 
-    with zipfile.ZipFile(waypoint_zip, "w") as z:
-        z.write("ownship.waypoints")
-        z.write("target.waypoints")
+            with zipfile.ZipFile(waypoint_zip, "w") as z:
+                z.write("ownship.waypoints")
+                z.write("target.waypoints")
 
-    st.download_button(
-        label="Download Waypoint Files",
-        data=waypoint_zip.getvalue(),
-        file_name="waypoint_files.zip",
-        mime="application/zip"
-    )
+            st.download_button(
+                label="Download Waypoint Files",
+                data=waypoint_zip.getvalue(),
+                file_name="waypoint_files.zip",
+                mime="application/zip"
+            )
 
 
-# ------------------------------
-# KML FILES
-# ------------------------------
-st.markdown("---")
-st.subheader(".KML FILES")
+        # ------------------------------
+        # KML FILES
+        # ------------------------------
+        st.markdown("---")
+        st.subheader(".KML FILES")
 
-if os.path.exists("ownship.kml") and os.path.exists("target.kml"):
+        if os.path.exists("ownship.kml") and os.path.exists("target.kml"):
 
-    kml_zip = io.BytesIO()
+            kml_zip = io.BytesIO()
 
-    with zipfile.ZipFile(kml_zip, "w") as z:
-        z.write("ownship.kml")
-        z.write("target.kml")
+            with zipfile.ZipFile(kml_zip, "w") as z:
+                z.write("ownship.kml")
+                z.write("target.kml")
 
-    st.download_button(
-        label="Download KML Files",
-        data=kml_zip.getvalue(),
-        file_name="kml_files.zip",
-        mime="application/zip"
-    )            
+            st.download_button(
+                label="Download KML Files",
+                data=kml_zip.getvalue(),
+                file_name="kml_files.zip",
+                mime="application/zip"
+            )            
+        
         with open("scenario_log.json", "rb") as f:
             st.markdown("---")
             st.subheader("VALIDATION LOG")
