@@ -210,56 +210,39 @@ if st.button("✅ Generate plan files"):
         # ==============================
         # DOWNLOAD BUTTONS
         # ==============================
-        st.markdown("---")
 
-        # PLAN FILES
-        st.subheader(".PLAN FILES")
+        with open("Ownship.plan", "rb") as f:
+            st.markdown("---")
+            st.subheader(".PLAN FILES")
+            st.download_button("Download Ownship Plan", f, file_name="Ownship.plan")
 
-        plan_zip = io.BytesIO()
-        with zipfile.ZipFile(plan_zip, "w") as z:
-            z.write("ownship.plan")
-            z.write("target.plan")
+        with open("target.plan", "rb") as f:
+            st.download_button("Download Target Plan", f, file_name="target.plan")
 
-        st.download_button(
-            "Download Plan Files",
-            data=plan_zip.getvalue(),
-            file_name="plan_files.zip",
-            mime="application/zip"
-        )
+        with open("Ownship.waypoints", "rb") as f:
+            st.markdown("---")
+            st.subheader(".WAYPOINT FILES")
+            st.download_button("Download Ownship Waypoints", f, file_name="Ownship.waypoints")
 
-        # WAYPOINT FILES
-        st.markdown("---")
-        st.subheader(".WAYPOINT FILES")
+        with open("target.waypoints", "rb") as f:
+            st.download_button("Download Target Waypoints", f, file_name="target.waypoints")
 
-        waypoint_zip = io.BytesIO()
-        with zipfile.ZipFile(waypoint_zip, "w") as z:
-            z.write("ownship.waypoints")
-            z.write("target.waypoints")
+        with open("Ownship.kml", "rb") as f:
+            st.markdown("---")
+            st.subheader(".KML FILES")
+            st.download_button("Download Ownship KML", f, file_name="Ownship.kml")
 
-        st.download_button(
-            "Download Waypoint Files",
-            data=waypoint_zip.getvalue(),
-            file_name="waypoint_files.zip",
-            mime="application/zip"
-        )
+        with open("target.kml", "rb") as f:
+            st.download_button("Download Target KML", f, file_name="target.kml")
 
-        # KML FILES
-        st.markdown("---")
-        st.subheader(".KML FILES")
+        with open("Ownship.yaml", "rb") as f:
+            st.markdown("---")
+            st.subheader(".YAML FILES")
+            st.download_button("Download Ownship YAML", f, file_name="Ownship.yaml")
 
-        kml_zip = io.BytesIO()
-        with zipfile.ZipFile(kml_zip, "w") as z:
-            z.write("ownship.kml")
-            z.write("target.kml")
-
-        st.download_button(
-            "Download KML Files",
-            data=kml_zip.getvalue(),
-            file_name="kml_files.zip",
-            mime="application/zip"
-        )
-        
-        
+        with open("target.yaml", "rb") as f:
+            st.download_button("Download Target YAML", f, file_name="target.yaml")
+            
         with open("scenario_log.json", "rb") as f:
             st.markdown("---")
             st.subheader("VALIDATION LOG")
