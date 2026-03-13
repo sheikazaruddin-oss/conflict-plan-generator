@@ -131,3 +131,80 @@ def write_kml_file(path, waypoints, name="CPA Mission"):
 
         f.write('  </Document>\n')
         f.write('</kml>\n')
+        
+        
+        
+def write_combined_kml_file(path, ownship_wps, target_wps):
+
+    def kml_coord(lat, lon, alt):
+        return f"{lon},{lat},{alt}"
+
+    with open(path, "w") as f:
+
+        f.write('<?xml version="1.0" encoding="UTF-8"?>\n')
+        f.write('<kml xmlns="http://www.opengis.net/kml/2.2">\n')
+        f.write('<Document>\n')
+
+        # -----------------------
+        # Ownship style (BLUE)
+        # -----------------------
+
+        f.write('<Style id="ownshipPath">\n')
+        f.write('<LineStyle>\n')
+        f.write('<color>ffff0000</color>\n') # Blue
+        f.write('<width>3</width>\n')
+        f.write('</LineStyle>\n')
+        f.write('</Style>\n')
+
+        # -----------------------
+        # Target style (RED)
+        # -----------------------
+
+        f.write('<Style id="targetPath">\n')
+        f.write('<LineStyle>\n')
+        f.write('<color>ff0000ff</color>\n') # Red
+        f.write('<width>3</width>\n')
+        f.write('</LineStyle>\n')
+        f.write('</Style>\n')
+
+        # -----------------------
+        # Ownship Path
+        # -----------------------
+
+        f.write('<Placemark>\n')
+        f.write('<name>Ownship Path</name>\n')
+        f.write('<styleUrl>#ownshipPath</styleUrl>\n')
+        f.write('<LineString>\n')
+        f.write('<tessellate>1</tessellate>\n')
+        f.write('<altitudeMode>absolute</altitudeMode>\n')
+        f.write('<coordinates>\n')
+
+        for lat, lon, alt in ownship_wps:
+            f.write(f"{kml_coord(lat,lon,alt)}\n")
+
+        f.write('</coordinates>\n')
+        f.write('</LineString>\n')
+        f.write('</Placemark>\n')
+
+        # -----------------------
+        # Target Path
+        # -----------------------
+
+        f.write('<Placemark>\n')
+        f.write('<name>Target Path</name>\n')
+        f.write('<styleUrl>#targetPath</styleUrl>\n')
+        f.write('<LineString>\n')
+        f.write('<tessellate>1</tessellate>\n')
+        f.write('<altitudeMode>absolute</altitudeMode>\n')
+        f.write('<coordinates>\n')
+
+        for lat, lon, alt in target_wps:
+            f.write(f"{kml_coord(lat,lon,alt)}\n")
+
+        f.write('</coordinates>\n')
+        f.write('</LineString>\n')
+        f.write('</Placemark>\n')
+
+        f.write('</Document>\n')
+        f.write('</kml>\n')
+

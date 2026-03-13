@@ -5,6 +5,7 @@ from units import ft_to_m, kt_to_mps, fpm_to_mps
 from validation_logger import save_validation_log
 import yaml
 from yaml_writer import write_yaml_file
+from plan_writer import write_combined_kml_file
 
 
 def main():
@@ -91,6 +92,10 @@ def main():
                    [points["os_start"], points["os_cpa"]])
     write_kml_file("target.kml",
                    [points["tgt_start"], points["tgt_cpa"]])
+                   
+    write_combined_kml_file("ownship_target.kml",
+                   [points["os_start"], points["os_cpa"]],[points["tgt_start"], points["tgt_cpa"]])
+
 
     # YAML generation
     write_yaml_file(

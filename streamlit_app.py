@@ -9,6 +9,7 @@ from plan_writer import write_plan_file, write_waypoints_file, write_kml_file
 from yaml_writer import write_yaml_file
 from units import ft_to_m, m_to_ft, kt_to_mps, mps_to_kt, fpm_to_mps
 from validation_logger import save_validation_log
+from plan_writer import write_combined_kml_file
 
 
 # -------------------------------------------------
@@ -277,6 +278,10 @@ if st.button("Generate Plan Files"):
         write_kml_file("target.kml",
                        [points["tgt_start"], points["tgt_cpa"]])
                        
+        write_combined_kml_file("ownship_target.kml",
+                       [points["os_start"], points["os_cpa"]],[points["tgt_start"], points["tgt_cpa"]])
+
+                       
                 
         write_yaml_file(
             path="ownship.yaml",
@@ -400,6 +405,7 @@ if st.session_state.files_generated:
     with zipfile.ZipFile(kml_zip, "w") as z:
         z.write("ownship.kml")
         z.write("target.kml")
+        z.write("ownship_target")
 
     st.download_button(
         "Download KML Files",
