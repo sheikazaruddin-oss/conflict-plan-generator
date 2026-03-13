@@ -2,6 +2,7 @@ import streamlit as st
 import base64
 import zipfile
 import io
+import matplotlib.pyplot as plt
 
 from conflict_math import compute_conflict_geometry
 from plan_writer import write_plan_file, write_waypoints_file, write_kml_file
@@ -10,17 +11,20 @@ from units import ft_to_m, m_to_ft, kt_to_mps, mps_to_kt, fpm_to_mps
 from validation_logger import save_validation_log
 
 
-# --------------------------------------------------
+# -------------------------------------------------
 # SESSION STATE
-# --------------------------------------------------
+# -------------------------------------------------
 
 if "files_generated" not in st.session_state:
     st.session_state.files_generated = False
 
+if "generated_points" not in st.session_state:
+    st.session_state.generated_points = None
 
-# --------------------------------------------------
-# UTIL FUNCTIONS
-# --------------------------------------------------
+
+# -------------------------------------------------
+# UTILS
+# -------------------------------------------------
 
 def mmss_to_sec(mmss: str) -> int:
 
@@ -39,9 +43,48 @@ def mmss_to_sec(mmss: str) -> int:
     return minutes * 60 + seconds
 
 
-# --------------------------------------------------
+# -------------------------------------------------
+# CPA VISUALIZATION
+# -------------------------------------------------
+
+def plot_cpa_encounter(points):
+
+    os_start = points["os_start"]
+    os_cpa = points["os_cpa"]
+
+    tgt_start = points["tgt_start"]
+    tgt_cpa = points["tgt_cpa"]
+
+    x_os = [os_start[1], os_cpa[1]]
+    y_os = [os_start[0], os_cpa[0]]
+
+    x_tgt = [tgt_start[1], tgt_cpa[1]]
+    y_tgt = [tgt_start[0], tgt_cpa[0]]
+
+    fig, ax = plt.subplots(figsize=(8, 6))
+
+    ax.plot(x_os, y_os, marker="o", label="Ownship Path")
+    ax.plot(x_tgt, y_tgt, marker="o", label="Target Path")
+
+    ax.annotate("OS Start", (os_start[1], os_start[0]))
+    ax.annotate("OS CPA", (os_cpa[1], os_cpa[0]))
+    ax.annotate("TGT Start", (tgt_start[1], tgt_start[0]))
+    ax.annotate("TGT CPA", (tgt_cpa[1], tgt_cpa[0]))
+
+    ax.set_xlabel("Longitude")
+    ax.set_ylabel("Latitude")
+
+    ax.set_title("CPA Encounter Visualization")
+
+    ax.legend()
+    ax.grid(True)
+
+    return fig
+
+
+# -------------------------------------------------
 # LOGO
-# --------------------------------------------------
+# -------------------------------------------------
 
 def show_logo_top_left(image_path, width=120):
 
@@ -53,7 +96,7 @@ def show_logo_top_left(image_path, width=120):
         <style>
         .top-left-logo {{
             position: fixed;
-            top: 50px;
+            top: 20px;
             left: 20px;
             z-index: 100;
         }}
@@ -70,18 +113,18 @@ def show_logo_top_left(image_path, width=120):
 show_logo_top_left("logo.png")
 
 
-# --------------------------------------------------
+# -------------------------------------------------
 # PAGE
-# --------------------------------------------------
+# -------------------------------------------------
 
 st.set_page_config(page_title="Conflict Plan Generator")
 
 st.title("✈ Conflict Plan Generator")
 
 
-# --------------------------------------------------
+# -------------------------------------------------
 # OWNSHIP INPUTS
-# --------------------------------------------------
+# -------------------------------------------------
 
 st.subheader("Ownship Aircraft Parameters")
 
@@ -101,9 +144,9 @@ os_speed_kt = st.number_input("Ownship Speed (kt)", value=20)
 os_vspeed_fpm = st.number_input("Ownship Vertical Speed (ft/min)", value=1)
 
 
-# --------------------------------------------------
+# -------------------------------------------------
 # TARGET INPUTS
-# --------------------------------------------------
+# -------------------------------------------------
 
 st.subheader("Target Aircraft Parameters")
 
@@ -116,9 +159,9 @@ tgt_alt_offset_ft = st.number_input("Target Alt Offset (ft)", value=20)
 relative_heading = st.number_input("Relative Heading (deg)", value=95.0)
 
 
-# --------------------------------------------------
-# GENERATE BUTTON
-# --------------------------------------------------
+# -------------------------------------------------
+# GENERATE
+# -------------------------------------------------
 
 if st.button("Generate Plan Files"):
 
@@ -127,10 +170,6 @@ if st.button("Generate Plan Files"):
         st.session_state.files_generated = True
 
         tcpa_sec = mmss_to_sec(tcpa_mmss)
-
-        # ----------------------------------
-        # UNIT CONVERSIONS
-        # ----------------------------------
 
         cpa_dist_m = ft_to_m(cpa_dist_ft)
 
@@ -147,10 +186,6 @@ if st.button("Generate Plan Files"):
         tgt_alt_offset_m = ft_to_m(tgt_alt_offset_ft)
 
 
-        # ----------------------------------
-        # COMPUTE GEOMETRY
-        # ----------------------------------
-
         points = compute_conflict_geometry(
             tcpa_sec=tcpa_sec,
             cpa_horiz_m=cpa_dist_m,
@@ -166,10 +201,8 @@ if st.button("Generate Plan Files"):
             relative_heading_deg=relative_heading
         )
 
+        st.session_state.generated_points = points
 
-        # ----------------------------------
-        # VALIDATION LOG
-        # ----------------------------------
 
         inputs_dict = {
             "tcpa_mmss": tcpa_mmss,
@@ -194,10 +227,6 @@ if st.button("Generate Plan Files"):
             tcpa_sec
         )
 
-
-        # ----------------------------------
-        # FILE GENERATION
-        # ----------------------------------
 
         home = points["os_start"]
 
@@ -269,7 +298,6 @@ if st.button("Generate Plan Files"):
             waypoints_file="target.waypoints"
         )
 
-
         st.success("All files generated successfully!")
 
     except Exception as e:
@@ -277,17 +305,28 @@ if st.button("Generate Plan Files"):
         st.error(f"Error: {e}")
 
 
-# --------------------------------------------------
+# -------------------------------------------------
+# CPA GRAPH
+# -------------------------------------------------
+
+if st.session_state.generated_points is not None:
+
+    st.markdown("---")
+
+    st.subheader("CPA Encounter Visualization")
+
+    fig = plot_cpa_encounter(st.session_state.generated_points)
+
+    st.pyplot(fig)
+
+
+# -------------------------------------------------
 # DOWNLOAD BUTTONS
-# --------------------------------------------------
+# -------------------------------------------------
 
 if st.session_state.files_generated:
 
     st.markdown("---")
-
-    # -----------------------------
-    # PLAN FILES
-    # -----------------------------
 
     st.subheader(".PLAN FILES")
 
@@ -304,10 +343,6 @@ if st.session_state.files_generated:
         mime="application/zip"
     )
 
-
-    # -----------------------------
-    # WAYPOINT FILES
-    # -----------------------------
 
     st.markdown("---")
 
@@ -327,10 +362,6 @@ if st.session_state.files_generated:
     )
 
 
-    # -----------------------------
-    # YAML FILES
-    # -----------------------------
-
     st.markdown("---")
 
     st.subheader(".YAML FILES")
@@ -348,10 +379,6 @@ if st.session_state.files_generated:
         mime="application/zip"
     )
 
-
-    # -----------------------------
-    # VALIDATION LOG (UNCHANGED)
-    # -----------------------------
 
     with open("scenario_log.json", "rb") as f:
 
