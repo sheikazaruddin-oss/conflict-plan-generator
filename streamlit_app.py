@@ -277,7 +277,8 @@ if st.button("Generate Plan Files"):
         write_kml_file("target.kml",
                        [points["tgt_start"], points["tgt_cpa"]])
                        
-                write_yaml_file(
+                
+        write_yaml_file(
             path="ownship.yaml",
             callsign="OWN01",
             sysid=1,
