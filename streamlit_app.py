@@ -66,8 +66,8 @@ def plot_cpa_encounter(points):
     ax.plot(x_os, y_os, marker="o", label="Ownship Path")
     ax.plot(x_tgt, y_tgt, marker="o", label="Target Path")
 
-    # label offsets to prevent overlap
-    ax.annotate("OS Start", (os_start[1], os_start[0]), xytext=(-20,10), textcoords="offset points")
+    # label offsets
+    ax.annotate("OS Start", (os_start[1], os_start[0]), xytext=(-25,10), textcoords="offset points")
     ax.annotate("OS CPA", (os_cpa[1], os_cpa[0]), xytext=(10,10), textcoords="offset points")
 
     ax.annotate("TGT Start", (tgt_start[1], tgt_start[0]), xytext=(10,-15), textcoords="offset points")
@@ -81,11 +81,18 @@ def plot_cpa_encounter(points):
     ax.legend()
     ax.grid(True)
 
-    # fixed geographic scale
-    ax.set_xlim(-140, -120)
-    ax.set_ylim(30, 40)
+    # --------------------------------
+    # AUTO SCALE AROUND ENCOUNTER
+    # --------------------------------
 
-    # remove scientific notation
+    all_lon = x_os + x_tgt
+    all_lat = y_os + y_tgt
+
+    margin = 0.01
+
+    ax.set_xlim(min(all_lon) - margin, max(all_lon) + margin)
+    ax.set_ylim(min(all_lat) - margin, max(all_lat) + margin)
+
     ax.ticklabel_format(style='plain', axis='both')
 
     return fig
@@ -105,7 +112,7 @@ def show_logo_top_left(image_path, width=120):
         <style>
         .top-left-logo {{
             position: fixed;
-            top: 50px;
+            top: 20px;
             left: 20px;
             z-index: 100;
         }}
