@@ -63,15 +63,31 @@ def plot_cpa_encounter(points):
 
     fig, ax = plt.subplots(figsize=(7,7))
 
+    # paths
     ax.plot(x_os, y_os, marker="o", label="Ownship Path")
     ax.plot(x_tgt, y_tgt, marker="o", label="Target Path")
 
-    # label offsets
-    ax.annotate("OS Start", (os_start[1], os_start[0]), xytext=(-25,10), textcoords="offset points")
-    ax.annotate("OS CPA", (os_cpa[1], os_cpa[0]), xytext=(10,10), textcoords="offset points")
+    # start labels
+    ax.annotate("OS Start",
+                (os_start[1], os_start[0]),
+                xytext=(-25,10),
+                textcoords="offset points")
 
-    ax.annotate("TGT Start", (tgt_start[1], tgt_start[0]), xytext=(10,-15), textcoords="offset points")
-    ax.annotate("TGT CPA", (tgt_cpa[1], tgt_cpa[0]), xytext=(-25,10), textcoords="offset points")
+    ax.annotate("TGT Start",
+                (tgt_start[1], tgt_start[0]),
+                xytext=(10,-15),
+                textcoords="offset points")
+
+    # CPA marker
+    ax.scatter(os_cpa[1], os_cpa[0],
+               s=120,
+               marker="X",
+               color="black")
+
+    ax.annotate("CPA",
+                (os_cpa[1], os_cpa[0]),
+                xytext=(10,10),
+                textcoords="offset points")
 
     ax.set_xlabel("Longitude")
     ax.set_ylabel("Latitude")
@@ -81,19 +97,23 @@ def plot_cpa_encounter(points):
     ax.legend()
     ax.grid(True)
 
-    # --------------------------------
-    # AUTO SCALE AROUND ENCOUNTER
-    # --------------------------------
+    # -----------------------
+    # AUTO SCALE AROUND DATA
+    # -----------------------
 
     all_lon = x_os + x_tgt
     all_lat = y_os + y_tgt
 
     margin = 0.01
 
-    ax.set_xlim(min(all_lon) - margin, max(all_lon) + margin)
-    ax.set_ylim(min(all_lat) - margin, max(all_lat) + margin)
+    ax.set_xlim(min(all_lon) - margin,
+                max(all_lon) + margin)
 
-    ax.ticklabel_format(style='plain', axis='both')
+    ax.set_ylim(min(all_lat) - margin,
+                max(all_lat) + margin)
+
+    # remove scientific notation
+    ax.ticklabel_format(useOffset=False, style='plain')
 
     return fig
 
@@ -148,8 +168,13 @@ tcpa_mmss = st.text_input("TCPA (mm:ss)", value="01:00")
 
 cpa_dist_ft = st.number_input("CPA Distance (ft)", value=20)
 
-os_lat = st.number_input("Ownship Latitude", value=37.618805, format="%.6f")
-os_lon = st.number_input("Ownship Longitude", value=-122.375416, format="%.6f")
+os_lat = st.number_input("Ownship Latitude",
+                         value=37.618805,
+                         format="%.6f")
+
+os_lon = st.number_input("Ownship Longitude",
+                         value=-122.375416,
+                         format="%.6f")
 
 os_alt_ft = st.number_input("Ownship Altitude (ft)", value=50)
 
@@ -201,7 +226,6 @@ if st.button("Generate Plan Files"):
 
         tgt_alt_offset_m = ft_to_m(tgt_alt_offset_ft)
 
-
         points = compute_conflict_geometry(
             tcpa_sec=tcpa_sec,
             cpa_horiz_m=cpa_dist_m,
@@ -219,78 +243,43 @@ if st.button("Generate Plan Files"):
 
         st.session_state.generated_points = points
 
-
-        inputs_dict = {
-            "tcpa_mmss": tcpa_mmss,
-            "tcpa_sec": tcpa_sec,
-            "cpa_ft": cpa_dist_ft,
-            "os_lat_deg": os_lat,
-            "os_lon_deg": os_lon,
-            "os_alt_ft": os_alt_ft,
-            "os_course_deg": os_course,
-            "os_speed_kt": os_speed_kt,
-            "os_vspeed_fpm": os_vspeed_fpm,
-            "rel_speed_kt": rel_speed_kt,
-            "conflict_dh_ft": conflict_dh_ft,
-            "tgt_alt_offset_ft": tgt_alt_offset_ft,
-            "relative_heading_deg": relative_heading,
-        }
-
+        # validation log
         save_validation_log(
             "scenario_log.json",
-            inputs_dict,
+            {
+                "tcpa_mmss": tcpa_mmss,
+                "tcpa_sec": tcpa_sec,
+                "cpa_ft": cpa_dist_ft
+            },
             points,
             tcpa_sec
         )
 
-
         home = points["os_start"]
 
+        write_plan_file("ownship.plan",
+                        [points["os_start"], points["os_cpa"]],
+                        home)
 
-        write_plan_file("ownship.plan", [points["os_start"], points["os_cpa"]], home)
-        write_plan_file("target.plan", [points["tgt_start"], points["tgt_cpa"]], home)
+        write_plan_file("target.plan",
+                        [points["tgt_start"], points["tgt_cpa"]],
+                        home)
 
-        write_waypoints_file("ownship.waypoints", [points["os_start"], points["os_cpa"]])
-        write_waypoints_file("target.waypoints", [points["tgt_start"], points["tgt_cpa"]])
+        write_waypoints_file("ownship.waypoints",
+                             [points["os_start"], points["os_cpa"]])
 
-        write_kml_file("ownship.kml", [points["os_start"], points["os_cpa"]])
-        write_kml_file("target.kml", [points["tgt_start"], points["tgt_cpa"]])
+        write_waypoints_file("target.waypoints",
+                             [points["tgt_start"], points["tgt_cpa"]])
 
+        write_kml_file("ownship.kml",
+                       [points["os_start"], points["os_cpa"]])
 
-        write_yaml_file(
-            path="ownship.yaml",
-            callsign="OWN01",
-            sysid=1,
-            lat_deg=os_lat,
-            lon_deg=os_lon,
-            alt_ft=os_alt_ft,
-            course_deg=os_course,
-            ground_speed_kt=os_speed_kt,
-            vertical_speed_fpm=os_vspeed_fpm,
-            waypoints_file="ownship.waypoints"
-        )
-
-
-        tgt_start = points["tgt_start"]
-        tgt_alt_ft = round(m_to_ft(tgt_start[2]), 2)
-
-        write_yaml_file(
-            path="target.yaml",
-            callsign="TGT01",
-            sysid=2,
-            lat_deg=tgt_start[0],
-            lon_deg=tgt_start[1],
-            alt_ft=tgt_alt_ft,
-            course_deg=points["tgt_course_deg"],
-            ground_speed_kt=round(mps_to_kt(rel_speed_mps), 2),
-            vertical_speed_fpm=0.0,
-            waypoints_file="target.waypoints"
-        )
+        write_kml_file("target.kml",
+                       [points["tgt_start"], points["tgt_cpa"]])
 
         st.success("All files generated successfully!")
 
     except Exception as e:
-
         st.error(f"Error: {e}")
 
 
@@ -301,11 +290,9 @@ if st.button("Generate Plan Files"):
 if st.session_state.generated_points is not None:
 
     st.markdown("---")
-
     st.subheader("CPA Encounter Visualization")
 
     fig = plot_cpa_encounter(st.session_state.generated_points)
-
     st.pyplot(fig)
 
 
@@ -324,56 +311,31 @@ if st.session_state.files_generated:
         z.write("ownship.plan")
         z.write("target.plan")
 
-    st.download_button(
-        "Download Plan Files",
-        data=plan_zip.getvalue(),
-        file_name="plan_files.zip",
-        mime="application/zip"
-    )
-
+    st.download_button("Download Plan Files",
+                       data=plan_zip.getvalue(),
+                       file_name="plan_files.zip",
+                       mime="application/zip")
 
     st.markdown("---")
     st.subheader(".WAYPOINT FILES")
 
-    waypoint_zip = io.BytesIO()
+    wp_zip = io.BytesIO()
 
-    with zipfile.ZipFile(waypoint_zip, "w") as z:
+    with zipfile.ZipFile(wp_zip, "w") as z:
         z.write("ownship.waypoints")
         z.write("target.waypoints")
 
-    st.download_button(
-        "Download Waypoint Files",
-        data=waypoint_zip.getvalue(),
-        file_name="waypoint_files.zip",
-        mime="application/zip"
-    )
-
-
-    st.markdown("---")
-    st.subheader(".YAML FILES")
-
-    yaml_zip = io.BytesIO()
-
-    with zipfile.ZipFile(yaml_zip, "w") as z:
-        z.write("ownship.yaml")
-        z.write("target.yaml")
-
-    st.download_button(
-        "Download YAML Files",
-        data=yaml_zip.getvalue(),
-        file_name="yaml_files.zip",
-        mime="application/zip"
-    )
-
+    st.download_button("Download Waypoint Files",
+                       data=wp_zip.getvalue(),
+                       file_name="waypoints.zip",
+                       mime="application/zip")
 
     with open("scenario_log.json", "rb") as f:
 
         st.markdown("---")
         st.subheader("VALIDATION LOG")
 
-        st.download_button(
-            "Download Validation Log",
-            f,
-            file_name="scenario_log.json",
-            mime="application/json"
-        )
+        st.download_button("Download Validation Log",
+                           f,
+                           file_name="scenario_log.json",
+                           mime="application/json")
