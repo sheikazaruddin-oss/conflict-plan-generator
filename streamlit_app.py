@@ -405,7 +405,7 @@ if st.session_state.files_generated:
     with zipfile.ZipFile(kml_zip, "w") as z:
         z.write("ownship.kml")
         z.write("target.kml")
-        z.write("ownship_target")
+        z.write("ownship_target.kml")
 
     st.download_button(
         "Download KML Files",
