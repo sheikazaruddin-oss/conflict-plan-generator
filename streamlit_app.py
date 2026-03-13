@@ -276,6 +276,41 @@ if st.button("Generate Plan Files"):
 
         write_kml_file("target.kml",
                        [points["tgt_start"], points["tgt_cpa"]])
+                       
+                write_yaml_file(
+            path="ownship.yaml",
+            callsign="OWN01",
+            sysid=1,
+            lat_deg=os_lat,
+            lon_deg=os_lon,
+            alt_ft=os_alt_ft,
+            course_deg=os_course,
+            ground_speed_kt=os_speed_kt,
+            vertical_speed_fpm=os_vspeed_fpm,
+            waypoints_file="ownship.waypoints"
+        )
+
+
+        tgt_start = points["tgt_start"]
+
+        tgt_alt_ft = round(m_to_ft(tgt_start[2]), 2)
+
+
+        write_yaml_file(
+            path="target.yaml",
+            callsign="TGT01",
+            sysid=2,
+            lat_deg=tgt_start[0],
+            lon_deg=tgt_start[1],
+            alt_ft=tgt_alt_ft,
+            course_deg=points["tgt_course_deg"],
+            ground_speed_kt=round(mps_to_kt(rel_speed_mps), 2),
+            vertical_speed_fpm=0.0,
+            waypoints_file="target.waypoints"
+        )
+
+
+
 
         st.success("All files generated successfully!")
 
@@ -329,6 +364,30 @@ if st.session_state.files_generated:
                        data=wp_zip.getvalue(),
                        file_name="waypoints.zip",
                        mime="application/zip")
+                       
+                       
+        # -----------------------------
+    # YAML FILES
+    # -----------------------------
+
+    st.markdown("---")
+
+    st.subheader(".YAML FILES")
+
+    yaml_zip = io.BytesIO()
+
+    with zipfile.ZipFile(yaml_zip, "w") as z:
+        z.write("ownship.yaml")
+        z.write("target.yaml")
+
+    st.download_button(
+        "Download YAML Files",
+        data=yaml_zip.getvalue(),
+        file_name="yaml_files.zip",
+        mime="application/zip"
+    )
+
+
 
     with open("scenario_log.json", "rb") as f:
 
