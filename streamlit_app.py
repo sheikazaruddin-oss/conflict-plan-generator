@@ -23,7 +23,7 @@ if "generated_points" not in st.session_state:
 
 
 # -------------------------------------------------
-# UTILS
+# TIME CONVERSION
 # -------------------------------------------------
 
 def mmss_to_sec(mmss: str) -> int:
@@ -61,15 +61,17 @@ def plot_cpa_encounter(points):
     x_tgt = [tgt_start[1], tgt_cpa[1]]
     y_tgt = [tgt_start[0], tgt_cpa[0]]
 
-    fig, ax = plt.subplots(figsize=(8, 6))
+    fig, ax = plt.subplots(figsize=(7,7))
 
     ax.plot(x_os, y_os, marker="o", label="Ownship Path")
     ax.plot(x_tgt, y_tgt, marker="o", label="Target Path")
 
-    ax.annotate("OS Start", (os_start[1], os_start[0]))
-    ax.annotate("OS CPA", (os_cpa[1], os_cpa[0]))
-    ax.annotate("TGT Start", (tgt_start[1], tgt_start[0]))
-    ax.annotate("TGT CPA", (tgt_cpa[1], tgt_cpa[0]))
+    # label offsets to prevent overlap
+    ax.annotate("OS Start", (os_start[1], os_start[0]), xytext=(-20,10), textcoords="offset points")
+    ax.annotate("OS CPA", (os_cpa[1], os_cpa[0]), xytext=(10,10), textcoords="offset points")
+
+    ax.annotate("TGT Start", (tgt_start[1], tgt_start[0]), xytext=(10,-15), textcoords="offset points")
+    ax.annotate("TGT CPA", (tgt_cpa[1], tgt_cpa[0]), xytext=(-25,10), textcoords="offset points")
 
     ax.set_xlabel("Longitude")
     ax.set_ylabel("Latitude")
@@ -78,6 +80,13 @@ def plot_cpa_encounter(points):
 
     ax.legend()
     ax.grid(True)
+
+    # fixed geographic scale
+    ax.set_xlim(-140, -120)
+    ax.set_ylim(30, 40)
+
+    # remove scientific notation
+    ax.ticklabel_format(style='plain', axis='both')
 
     return fig
 
@@ -96,7 +105,7 @@ def show_logo_top_left(image_path, width=120):
         <style>
         .top-left-logo {{
             position: fixed;
-            top: 20px;
+            top: 50px;
             left: 20px;
             z-index: 100;
         }}
@@ -160,7 +169,7 @@ relative_heading = st.number_input("Relative Heading (deg)", value=95.0)
 
 
 # -------------------------------------------------
-# GENERATE
+# GENERATE FILES
 # -------------------------------------------------
 
 if st.button("Generate Plan Files"):
@@ -231,39 +240,14 @@ if st.button("Generate Plan Files"):
         home = points["os_start"]
 
 
-        write_plan_file(
-            "ownship.plan",
-            [points["os_start"], points["os_cpa"]],
-            home
-        )
+        write_plan_file("ownship.plan", [points["os_start"], points["os_cpa"]], home)
+        write_plan_file("target.plan", [points["tgt_start"], points["tgt_cpa"]], home)
 
-        write_plan_file(
-            "target.plan",
-            [points["tgt_start"], points["tgt_cpa"]],
-            home
-        )
+        write_waypoints_file("ownship.waypoints", [points["os_start"], points["os_cpa"]])
+        write_waypoints_file("target.waypoints", [points["tgt_start"], points["tgt_cpa"]])
 
-
-        write_waypoints_file(
-            "ownship.waypoints",
-            [points["os_start"], points["os_cpa"]]
-        )
-
-        write_waypoints_file(
-            "target.waypoints",
-            [points["tgt_start"], points["tgt_cpa"]]
-        )
-
-
-        write_kml_file(
-            "ownship.kml",
-            [points["os_start"], points["os_cpa"]]
-        )
-
-        write_kml_file(
-            "target.kml",
-            [points["tgt_start"], points["tgt_cpa"]]
-        )
+        write_kml_file("ownship.kml", [points["os_start"], points["os_cpa"]])
+        write_kml_file("target.kml", [points["tgt_start"], points["tgt_cpa"]])
 
 
         write_yaml_file(
@@ -281,9 +265,7 @@ if st.button("Generate Plan Files"):
 
 
         tgt_start = points["tgt_start"]
-
         tgt_alt_ft = round(m_to_ft(tgt_start[2]), 2)
-
 
         write_yaml_file(
             path="target.yaml",
@@ -306,7 +288,7 @@ if st.button("Generate Plan Files"):
 
 
 # -------------------------------------------------
-# CPA GRAPH
+# GRAPH
 # -------------------------------------------------
 
 if st.session_state.generated_points is not None:
@@ -327,7 +309,6 @@ if st.session_state.generated_points is not None:
 if st.session_state.files_generated:
 
     st.markdown("---")
-
     st.subheader(".PLAN FILES")
 
     plan_zip = io.BytesIO()
@@ -345,7 +326,6 @@ if st.session_state.files_generated:
 
 
     st.markdown("---")
-
     st.subheader(".WAYPOINT FILES")
 
     waypoint_zip = io.BytesIO()
@@ -363,7 +343,6 @@ if st.session_state.files_generated:
 
 
     st.markdown("---")
-
     st.subheader(".YAML FILES")
 
     yaml_zip = io.BytesIO()
@@ -383,7 +362,6 @@ if st.session_state.files_generated:
     with open("scenario_log.json", "rb") as f:
 
         st.markdown("---")
-
         st.subheader("VALIDATION LOG")
 
         st.download_button(
