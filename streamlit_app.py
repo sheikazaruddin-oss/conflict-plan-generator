@@ -387,6 +387,26 @@ if st.session_state.files_generated:
         file_name="yaml_files.zip",
         mime="application/zip"
     )
+    
+    # -------------------------------------------------------
+    # KML FILES
+    # -------------------------------------------------------
+
+    st.markdown("---")
+    st.subheader(". KML FILES")
+
+    kml_zip = io.BytesIO()
+
+    with zipfile.ZipFile(kml_zip, "w") as z:
+        z.write("ownship.kml")
+        z.write("target.kml")
+
+    st.download_button(
+        "Download KML Files",
+        data=kml_zip.getvalue(),
+        file_name="kml_files.zip",
+        mime="application/zip"
+    )
 
 
 
