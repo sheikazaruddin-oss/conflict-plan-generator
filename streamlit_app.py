@@ -71,6 +71,7 @@ def plot_cpa_encounter(points):
     ax.annotate("TGT Start", (tgt_start[1], tgt_start[0]), xytext=(10,-15), textcoords="offset points")
 
     ax.scatter(os_cpa[1], os_cpa[0], s=120, marker="X", color="black")
+
     ax.annotate("CPA", (os_cpa[1], os_cpa[0]), xytext=(10,10), textcoords="offset points")
 
     ax.set_xlabel("Longitude")
@@ -133,7 +134,7 @@ st.title("✈ Conflict Plan Generator")
 
 
 # -------------------------------------------------
-# CALLSIGNS (NEW)
+# NEW CALLSIGN INPUTS
 # -------------------------------------------------
 
 os_callsign = st.text_input("Ownship Callsign", value="OWN01")
@@ -225,7 +226,7 @@ if st.button("Generate Plan Files"):
 
         combined_kml = f"{ownship_prefix}_{target_prefix}.kml"
 
-        # validation log
+        # validation log (UNCHANGED)
         save_validation_log(
             "scenario_log.json",
             {
@@ -239,6 +240,7 @@ if st.button("Generate Plan Files"):
 
         home = points["os_start"]
 
+        # WRITE FILES
         write_plan_file(ownship_plan, [points["os_start"], points["os_cpa"]], home)
         write_plan_file(target_plan, [points["tgt_start"], points["tgt_cpa"]], home)
 
@@ -252,6 +254,7 @@ if st.button("Generate Plan Files"):
                                [points["os_start"], points["os_cpa"]],
                                [points["tgt_start"], points["tgt_cpa"]])
 
+        # YAML
         write_yaml_file(
             path=ownship_yaml,
             callsign=os_callsign,
@@ -288,23 +291,12 @@ if st.button("Generate Plan Files"):
 
 
 # -------------------------------------------------
-# GRAPH (UNCHANGED)
-# -------------------------------------------------
-
-if st.session_state.generated_points is not None:
-
-    st.markdown("---")
-    st.subheader("CPA Encounter Visualization")
-
-    fig = plot_cpa_encounter(st.session_state.generated_points)
-    st.pyplot(fig)
-
-
-# -------------------------------------------------
-# DOWNLOAD BUTTONS (UPDATED ONLY FILE NAMES)
+# DOWNLOAD BUTTONS
 # -------------------------------------------------
 
 if st.session_state.files_generated:
+
+    st.subheader(".PLAN FILES")
 
     plan_zip = io.BytesIO()
     with zipfile.ZipFile(plan_zip, "w") as z:
@@ -313,6 +305,8 @@ if st.session_state.files_generated:
 
     st.download_button("Download Plan Files", plan_zip.getvalue(), "plan_files.zip")
 
+    st.subheader(".WAYPOINT FILES")
+
     wp_zip = io.BytesIO()
     with zipfile.ZipFile(wp_zip, "w") as z:
         z.write(ownship_wp)
@@ -320,12 +314,16 @@ if st.session_state.files_generated:
 
     st.download_button("Download Waypoint Files", wp_zip.getvalue(), "waypoints.zip")
 
+    st.subheader(".YAML FILES")
+
     yaml_zip = io.BytesIO()
     with zipfile.ZipFile(yaml_zip, "w") as z:
         z.write(ownship_yaml)
         z.write(target_yaml)
 
     st.download_button("Download YAML Files", yaml_zip.getvalue(), "yaml.zip")
+
+    st.subheader(".KML FILES")
 
     kml_zip = io.BytesIO()
     with zipfile.ZipFile(kml_zip, "w") as z:
@@ -336,4 +334,5 @@ if st.session_state.files_generated:
     st.download_button("Download KML Files", kml_zip.getvalue(), "kml.zip")
 
     with open("scenario_log.json", "rb") as f:
+        st.subheader("VALIDATION LOG")
         st.download_button("Download Validation Log", f, "scenario_log.json")
