@@ -1,134 +1,145 @@
 import argparse
+
 from conflict_math import compute_conflict_geometry
-from plan_writer import write_plan_file, write_waypoints_file, write_kml_file
-from units import ft_to_m, kt_to_mps, fpm_to_mps
-from validation_logger import save_validation_log
-import yaml
+from plan_writer import (
+    write_plan_file,
+    write_waypoints_file,
+    write_kml_file,
+    write_combined_kml_file
+)
 from yaml_writer import write_yaml_file
-from plan_writer import write_combined_kml_file
+from units import ft_to_m, m_to_ft, kt_to_mps, mps_to_kt, fpm_to_mps
 
 
-def main():
-
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument("--tcpa", type=str, required=True, help="TCPA in mm:ss format")
-    parser.add_argument("--cpa", type=float, required=True, help="CPA distance (feet)")
-    parser.add_argument("--os-lat", type=float, required=True)
-    parser.add_argument("--os-lon", type=float, required=True)
-    parser.add_argument("--os-alt", type=float, required=True, help="Ownship altitude (feet)")
-    parser.add_argument("--os-course", type=float, required=True)
-    parser.add_argument("--os-speed", type=float, required=True, help="Ownship speed (knots)")
-    parser.add_argument("--os-vspeed", type=float, required=True, help="Ownship vertical speed (ft/min)")
-    parser.add_argument("--rel-speed", type=float, required=True, help="Target speed (knots)")
-    parser.add_argument("--conflict-dh", type=float, required=True, help="Vertical separation (feet)")
-    parser.add_argument("--tgt-alto", type=float, required=True, help="Target altitude offset (feet)")
-    parser.add_argument("--relative-heading", type=float, required=True)
-
-    args = parser.parse_args()
-    
-    try:
-        minuites, seconds = map(int, args.tcpa.split(":"))
-        tcpa_sec = minuites * 60 + seconds
-    except:
-        raise ValueError("TCPA must be in mm:ss format")
-        
-    inputs_dict = {
-        "tcpa_sec": tcpa_sec,
-        "tcpa_mmss": args.tcpa,
-        "cpa_ft": args.cpa,
-        "os_lat_deg": args.os_lat,
-        "os_lon_deg": args.os_lon,
-        "os_alt_ft": args.os_alt,
-        "os_course_deg": args.os_course,
-        "os_speed_kt": args.os_speed,
-        "os_vspeed_fpm": args.os_vspeed,
-        "rel_speed_kt": args.rel_speed,
-        "conflict_dh_ft": args.conflict_dh,
-        "tgt_alto_ft": args.tgt_alto,
-        "relative_heading_deg": args.relative_heading
-}
-    # 🔁 UNIT CONVERSIONS
-    cpa_m = ft_to_m(args.cpa)
-    os_alt_m = ft_to_m(args.os_alt)
-    os_speed_mps = kt_to_mps(args.os_speed)
-    os_vspeed_mps = fpm_to_mps(args.os_vspeed)
-    rel_speed_mps = kt_to_mps(args.rel_speed)
-    conflict_dh_m = ft_to_m(args.conflict_dh)
-    tgt_alto_m = ft_to_m(args.tgt_alto)
-
-    points = compute_conflict_geometry(
-        tcpa_sec=tcpa_sec,
-        cpa_horiz_m=cpa_m,
-        os_lat_deg=args.os_lat,
-        os_lon_deg=args.os_lon,
-        os_alt_m=os_alt_m,
-        os_course_deg=args.os_course,
-        os_speed_mps=os_speed_mps,
-        os_vspeed_mps=os_vspeed_mps,
-        rel_speed_mps=rel_speed_mps,
-        conflict_dh_m=conflict_dh_m,
-        target_alto_m=tgt_alto_m,
-        relative_heading_deg=args.relative_heading
-    )
-
-    
-    save_validation_log("scenario_log.json", inputs_dict, points, tcpa_sec)
-   
-    home = points["os_start"]
-
-    # Standard files
-    write_plan_file("ownship.plan",
-                    [points["os_start"], points["os_cpa"]], home)
-    write_plan_file("target.plan",
-                    [points["tgt_start"], points["tgt_cpa"]], home)
-
-    write_waypoints_file("ownship.waypoints",
-                         [points["os_start"], points["os_cpa"]])
-    write_waypoints_file("target.waypoints",
-                         [points["tgt_start"], points["tgt_cpa"]])
-
-    write_kml_file("ownship.kml",
-                   [points["os_start"], points["os_cpa"]])
-    write_kml_file("target.kml",
-                   [points["tgt_start"], points["tgt_cpa"]])
-                   
-    write_combined_kml_file("ownship_target.kml",
-                   [points["os_start"], points["os_cpa"]],[points["tgt_start"], points["tgt_cpa"]])
+def mmss_to_sec(mmss):
+    m, s = mmss.split(":")
+    return int(m) * 60 + int(s)
 
 
-    # YAML generation
-    write_yaml_file(
-        path="ownship.yaml",
-        callsign="OWN01",
-        sysid=1,
-        lat_deg=points["os_start"][0],
-        lon_deg=points["os_start"][1],
-        alt_ft=points["os_start"][2] * 3.28084,
-        course_deg=args.os_course,
-        ground_speed_kt=args.os_speed,
-        vertical_speed_fpm=args.os_vspeed,
-        waypoints_file="ownship.waypoints",
-        
-    )
-    # Use computed target start from geometry
-    tgt_start = points["tgt_start"]
+# ----------------------------
+# ARGUMENTS
+# ----------------------------
 
-    write_yaml_file(
-        path="target.yaml",
-        callsign="TGT01",
-        sysid=2,
-        lat_deg=points["tgt_start"][0],
-        lon_deg=points["tgt_start"][1],
-        alt_ft=points["tgt_start"][2] * 3.28084,
-        course_deg= points["tgt_course_deg"],
-        ground_speed_kt=args.rel_speed,
-        vertical_speed_fpm=args.os_vspeed,
-        waypoints_file="target.waypoints",
-    )
-    
-    print("✅ All files generated (.plan, .waypoints, .kml, .yaml)")
+parser = argparse.ArgumentParser()
+
+parser.add_argument("--os_callsign", default="OWN01")
+parser.add_argument("--tgt_callsign", default="TGT01")
+
+parser.add_argument("--tcpa", default="01:00")
+parser.add_argument("--cpa", type=float, default=20)
+
+parser.add_argument("--os_lat", type=float, required=True)
+parser.add_argument("--os_lon", type=float, required=True)
+
+parser.add_argument("--os_alt", type=float, default=50)
+parser.add_argument("--os_course", type=float, default=90)
+parser.add_argument("--os_speed", type=float, default=20)
+parser.add_argument("--os_vspeed", type=float, default=1)
+
+parser.add_argument("--rel_speed", type=float, default=10)
+parser.add_argument("--conflict_dh", type=float, default=30)
+parser.add_argument("--tgt_alto", type=float, default=20)
+parser.add_argument("--relative_heading", type=float, default=95)
+
+args = parser.parse_args()
 
 
-if __name__ == "__main__":
-    main()
+# ----------------------------
+# CONVERSIONS
+# ----------------------------
+
+tcpa_sec = mmss_to_sec(args.tcpa)
+
+points = compute_conflict_geometry(
+    tcpa_sec=tcpa_sec,
+    cpa_horiz_m=ft_to_m(args.cpa),
+    os_lat_deg=args.os_lat,
+    os_lon_deg=args.os_lon,
+    os_alt_m=ft_to_m(args.os_alt),
+    os_course_deg=args.os_course,
+    os_speed_mps=kt_to_mps(args.os_speed),
+    os_vspeed_mps=fpm_to_mps(args.os_vspeed),
+    rel_speed_mps=kt_to_mps(args.rel_speed),
+    conflict_dh_m=ft_to_m(args.conflict_dh),
+    target_alto_m=ft_to_m(args.tgt_alto),
+    relative_heading_deg=args.relative_heading
+)
+
+
+# ----------------------------
+# FILE NAMES
+# ----------------------------
+
+ownship_prefix = f"Ownship_{args.os_callsign}"
+target_prefix = f"Target_{args.tgt_callsign}"
+
+ownship_plan = f"{ownship_prefix}.plan"
+target_plan = f"{target_prefix}.plan"
+
+ownship_wp = f"{ownship_prefix}.waypoints"
+target_wp = f"{target_prefix}.waypoints"
+
+ownship_yaml = f"{ownship_prefix}.yaml"
+target_yaml = f"{target_prefix}.yaml"
+
+ownship_kml = f"{ownship_prefix}.kml"
+target_kml = f"{target_prefix}.kml"
+
+combined_kml = f"{ownship_prefix}_{target_prefix}.kml"
+
+
+# ----------------------------
+# WRITE FILES
+# ----------------------------
+
+home = points["os_start"]
+
+write_plan_file(ownship_plan, [points["os_start"], points["os_cpa"]], home)
+write_plan_file(target_plan, [points["tgt_start"], points["tgt_cpa"]], home)
+
+write_waypoints_file(ownship_wp, [points["os_start"], points["os_cpa"]])
+write_waypoints_file(target_wp, [points["tgt_start"], points["tgt_cpa"]])
+
+write_kml_file(ownship_kml, [points["os_start"], points["os_cpa"]])
+write_kml_file(target_kml, [points["tgt_start"], points["tgt_cpa"]])
+
+write_combined_kml_file(
+    combined_kml,
+    [points["os_start"], points["os_cpa"]],
+    [points["tgt_start"], points["tgt_cpa"]]
+)
+
+# ----------------------------
+# YAML
+# ----------------------------
+
+write_yaml_file(
+    path=ownship_yaml,
+    callsign=args.os_callsign,
+    sysid=1,
+    lat_deg=args.os_lat,
+    lon_deg=args.os_lon,
+    alt_ft=args.os_alt,
+    course_deg=args.os_course,
+    ground_speed_kt=args.os_speed,
+    vertical_speed_fpm=args.os_vspeed,
+    waypoints_file=ownship_wp
+)
+
+tgt_start = points["tgt_start"]
+tgt_alt_ft = round(m_to_ft(tgt_start[2]), 2)
+
+write_yaml_file(
+    path=target_yaml,
+    callsign=args.tgt_callsign,
+    sysid=2,
+    lat_deg=tgt_start[0],
+    lon_deg=tgt_start[1],
+    alt_ft=tgt_alt_ft,
+    course_deg=points["tgt_course_deg"],
+    ground_speed_kt=round(mps_to_kt(kt_to_mps(args.rel_speed)), 2),
+    vertical_speed_fpm=0.0,
+    waypoints_file=target_wp
+)
+
+print("✅ All files generated successfully!")
