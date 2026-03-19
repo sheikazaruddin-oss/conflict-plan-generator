@@ -206,6 +206,45 @@ if st.button("Generate Plan Files"):
             target_alto_m=tgt_alt_offset_m,
             relative_heading_deg=relative_heading
         )
+        
+        import pandas as pd
+
+        # -------------------------------------------------
+        # CREATE positions.csv FOR VISUALIZATION
+        # -------------------------------------------------
+
+        positions_df = pd.DataFrame([
+            {
+                "start_lat": points["os_start"][0],
+                "start_lon": points["os_start"][1],
+                "start_alt": points["os_start"][2],
+
+                "end_lat": points["os_cpa"][0],
+                "end_lon": points["os_cpa"][1],
+                "end_alt": points["os_cpa"][2],
+
+                "gspeed": os_speed_kt,
+                "vspeed": os_vspeed_fpm,
+                "course": os_course
+            },
+            {
+                "start_lat": points["tgt_start"][0],
+                "start_lon": points["tgt_start"][1],
+                "start_alt": points["tgt_start"][2],
+
+                "end_lat": points["tgt_cpa"][0],
+                "end_lon": points["tgt_cpa"][1],
+                "end_alt": points["tgt_cpa"][2],
+
+                "gspeed": rel_speed_kt,
+                "vspeed": 0.0,
+                "course": points["tgt_course_deg"]
+            }
+        ])
+
+        positions_df.to_csv("positions.csv", index=False)
+
+        print("positions.csv generated successfully")
 
         st.session_state.generated_points = points
 
@@ -369,3 +408,18 @@ if st.session_state.files_generated:
         st.subheader("VALIDATION LOG")
 
         st.download_button("Download Validation Log", f, "scenario_log.json")
+        
+    # -------------------------------------------------------   
+    # POSITIONS CSV FILE
+    # -------------------------------------------------------
+
+    st.markdown("---")
+    st.subheader("POSITIONS FILE (FOR WORLD PLOT)")
+
+    with open("positions.csv", "rb") as f:
+        st.download_button(
+            "Download positions.csv",
+            data=f,
+            file_name="positions.csv",
+            mime="text/csv"
+        )
