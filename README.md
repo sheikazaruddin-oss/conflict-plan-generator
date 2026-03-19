@@ -121,7 +121,7 @@ Use either:
 Step 4 — Run the Generator
 
 ```
-python app.py --tcpa 01:00 --cpa 20 --os-lat 37.618805 --os-lon -122.375416 --os-alt 50 --os-course 90 --os-speed 20 --os-vspeed 1 --rel-speed 10 --conflict-dh 30 --tgt-alto 100 --relative-heading 95
+python app.py --os_callsign OS12 --tgt_callsign TGT51 --tcpa 01:00 --cpa 20 --os_lat 37.618805 --os_lon -122.375416 --os_alt 50 --os_course 90 --os_speed 20 --os_vspeed 1 --rel_speed 10 --conflict_dh 30 --tgt_alto 100 --relative_heading 95
 ```
 
 Step 5 — Output Files
