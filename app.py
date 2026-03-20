@@ -65,7 +65,36 @@ points = compute_conflict_geometry(
     relative_heading_deg=args.relative_heading
 )
 
+import pandas as pd
 
+positions_df = pd.DataFrame([
+    {
+        "start_lat": points["os_start"][0],
+        "start_lon": points["os_start"][1],
+        "start_alt": args.os_alt,
+        "end_lat": points["os_cpa"][0],
+        "end_lon": points["os_cpa"][1],
+        "end_alt": args.os_alt,
+        "gspeed": args.os_speed,
+        "vspeed": args.os_vspeed,
+        "course": args.os_course
+    },
+    {
+        "start_lat": points["tgt_start"][0],
+        "start_lon": points["tgt_start"][1],
+        "start_alt": round(m_to_ft(points["tgt_start"][2]), 2),
+        "end_lat": points["tgt_cpa"][0],
+        "end_lon": points["tgt_cpa"][1],
+        "end_alt": round(m_to_ft(points["tgt_cpa"][2]), 2),
+        "gspeed": args.rel_speed,
+        "vspeed": 0.0,
+        "course": points["tgt_course_deg"]
+    }
+])
+
+positions_df.to_csv("positions.csv", index=False)
+
+print("positions.csv generated successfully")
 # ----------------------------
 # FILE NAMES
 # ----------------------------
