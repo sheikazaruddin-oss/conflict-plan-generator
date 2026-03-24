@@ -51,16 +51,16 @@ def mmss_to_sec(mmss: str) -> int:
 def plot_cpa_encounter(points):
 
     os_start = points["os_start"]
-    os_cpa = points["os_cpa"]
+    os_cpa = points["os_end"]
 
     tgt_start = points["tgt_start"]
-    tgt_cpa = points["tgt_cpa"]
+    tgt_cpa = points["tgt_end"]
 
-    x_os = [os_start[1], os_cpa[1]]
-    y_os = [os_start[0], os_cpa[0]]
+    x_os = [os_start[1], os_end[1]]
+    y_os = [os_start[0], os_end[0]]
 
-    x_tgt = [tgt_start[1], tgt_cpa[1]]
-    y_tgt = [tgt_start[0], tgt_cpa[0]]
+    x_tgt = [tgt_start[1], tgt_end[1]]
+    y_tgt = [tgt_start[0], tgt_end[0]]
 
     fig, ax = plt.subplots(figsize=(7,7))
 
@@ -72,7 +72,7 @@ def plot_cpa_encounter(points):
 
     ax.scatter(os_cpa[1], os_cpa[0], s=120, marker="X", color="black")
 
-    ax.annotate("CPA", (os_cpa[1], os_cpa[0]), xytext=(10,10), textcoords="offset points")
+    ax.annotate("CPA", (os_end[1], os_end[0]), xytext=(10,10), textcoords="offset points")
 
     ax.set_xlabel("Longitude")
     ax.set_ylabel("Latitude")
