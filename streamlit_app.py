@@ -208,7 +208,7 @@ if st.button("Generate Plan Files"):
             rel_speed_mps=rel_speed_mps,
             conflict_dh_m=conflict_dh_m,
             target_alto_m=tgt_alt_offset_m,
-            relative_heading_deg=relative_heading
+            relative_heading_deg=relative_heading,
             post_cpa_sec=post_cpa_sec
         )
         
@@ -224,9 +224,9 @@ if st.button("Generate Plan Files"):
                 "start_lon": points["os_start"][1],
                 "start_alt": points["os_start"][2],
 
-                "end_lat": points["os_cpa"][0],
-                "end_lon": points["os_cpa"][1],
-                "end_alt": points["os_cpa"][2],
+                "end_lat": points["os_end"][0],
+                "end_lon": points["os_end"][1],
+                "end_alt": points["os_end"][2],
 
                 "gspeed": os_speed_kt,
                 "vspeed": os_vspeed_fpm,
@@ -237,9 +237,9 @@ if st.button("Generate Plan Files"):
                 "start_lon": points["tgt_start"][1],
                 "start_alt": points["tgt_start"][2],
 
-                "end_lat": points["tgt_cpa"][0],
-                "end_lon": points["tgt_cpa"][1],
-                "end_alt": points["tgt_cpa"][2],
+                "end_lat": points["tgt_end"][0],
+                "end_lon": points["tgt_end"][1],
+                "end_alt": points["tgt_end"][2],
 
                 "gspeed": rel_speed_kt,
                 "vspeed": 0.0,
