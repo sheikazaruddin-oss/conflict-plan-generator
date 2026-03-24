@@ -39,7 +39,7 @@ def write_plan_file(path, waypoints, home_position):
             "items": [
 
                 # Existing waypoints (unchanged)
-                make_waypoint(wp[0], wp[1], wp[2], i),
+                make_waypoint(wp[0], wp[1], wp[2], i)
                 for i, wp in enumerate(waypoints)
             ],
             "plannedHomePosition": list(home_position),
