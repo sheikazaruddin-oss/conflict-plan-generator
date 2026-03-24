@@ -149,7 +149,7 @@ tgt_callsign = st.text_input("Target Callsign", value="TGT01")
 st.subheader("Ownship Aircraft Parameters")
 
 tcpa_mmss = st.text_input("TCPA (mm:ss)", value="01:00")
-post_cpa_time_mmss = st.text_input("Post-CPA Time (mm:ss)", value="10:00")
+post_cpa_mmss = st.text_input("Post-CPA Time (mm:ss)", value="10:00")
 
 cpa_dist_ft = st.number_input("CPA Distance (ft)", value=20)
 
