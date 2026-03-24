@@ -56,11 +56,11 @@ def plot_cpa_encounter(points):
     tgt_start = points["tgt_start"]
     tgt_cpa = points["tgt_end"]
 
-    x_os = [os_start[1], os_end[1]]
-    y_os = [os_start[0], os_end[0]]
+    x_os = [os_start[1], os_cpa[1], points["os_end"][1]]
+    y_os = [os_start[0], os_cpa[0], points["os_end"][0]]
 
-    x_tgt = [tgt_start[1], tgt_end[1]]
-    y_tgt = [tgt_start[0], tgt_end[0]]
+    x_tgt = [tgt_start[1], tgt_cpa[1], points["tgt_end"][1]]
+    y_tgt = [tgt_start[0], tgt_cpa[0], points["tgt_end"][0]]
 
     fig, ax = plt.subplots(figsize=(7,7))
 
