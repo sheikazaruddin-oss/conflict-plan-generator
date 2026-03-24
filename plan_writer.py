@@ -37,12 +37,10 @@ def write_plan_file(path, waypoints, home_position):
             "firmwareType": 12,
             "hoverSpeed": 5,
             "items": [
-                # ✅ ADDED: Takeoff must be FIRST
- #               make_takeoff(waypoints[0][2], 0),
 
                 # Existing waypoints (unchanged)
-                make_waypoint(waypoints[0][0], waypoints[0][1], waypoints[0][2], 0),
-                make_waypoint(waypoints[1][0], waypoints[1][1], waypoints[1][2], 1),
+                make_waypoint(wp[0], wp[1], wp[2], i),
+                for i, wp in enumerate(waypoints)
             ],
             "plannedHomePosition": list(home_position),
             "vehicleType": 2,
