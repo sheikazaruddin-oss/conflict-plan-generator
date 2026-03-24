@@ -51,16 +51,18 @@ def mmss_to_sec(mmss: str) -> int:
 def plot_cpa_encounter(points):
 
     os_start = points["os_start"]
-    os_cpa = points["os_end"]
+    os_cpa = points["os_cpa"]
+    os_end = points["os_end"]
 
     tgt_start = points["tgt_start"]
-    tgt_cpa = points["tgt_end"]
+    tgt_cpa = points["tgt_cpa"]
+    tgt_end = points["tgt_end"]
 
-    x_os = [os_start[1], os_cpa[1], points["os_end"][1]]
-    y_os = [os_start[0], os_cpa[0], points["os_end"][0]]
+    x_os = [os_start[1], os_cpa[1], os_end[1]]
+    y_os = [os_start[0], os_cpa[0], os_end[0]]
 
-    x_tgt = [tgt_start[1], tgt_cpa[1], points["tgt_end"][1]]
-    y_tgt = [tgt_start[0], tgt_cpa[0], points["tgt_end"][0]]
+    x_tgt = [tgt_start[1], tgt_cpa[1], tgt_end[1]]
+    y_tgt = [tgt_start[0], tgt_cpa[0], tgt_end[0]]
 
     fig, ax = plt.subplots(figsize=(7,7))
 
@@ -281,14 +283,14 @@ if st.button("Generate Plan Files"):
 
         home = points["os_start"]
 
-        write_plan_file(ownship_plan, [points["os_start"], points["os_cpa"]], home)
-        write_plan_file(target_plan, [points["tgt_start"], points["tgt_cpa"]], home)
+        write_plan_file(ownship_plan, [points["os_start"], points["os_cpa"], points["os_end"]], home)
+        write_plan_file(target_plan, [points["tgt_start"], points["tgt_cpa"], points["tgt_end"]], home)
 
-        write_waypoints_file(ownship_wp, [points["os_start"], points["os_cpa"]])
-        write_waypoints_file(target_wp, [points["tgt_start"], points["tgt_cpa"]])
+        write_waypoints_file(ownship_wp, [points["os_start"], points["os_cpa"], points["os_end"]])
+        write_waypoints_file(target_wp, [points["tgt_start"], points["tgt_cpa"], points["tgt_end"]])
 
-        write_kml_file(ownship_kml, [points["os_start"], points["os_cpa"]])
-        write_kml_file(target_kml, [points["tgt_start"], points["tgt_cpa"]])
+        write_kml_file(ownship_kml, [points["os_start"], points["os_cpa"], points["os_end"]])
+        write_kml_file(target_kml, [points["tgt_start"], points["tgt_cpa"], points["tgt_end"]])
 
         write_combined_kml_file(combined_kml,
                                [points["os_start"], points["os_cpa"], points["os_end"]],
