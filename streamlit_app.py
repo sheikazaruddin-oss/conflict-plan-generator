@@ -149,6 +149,8 @@ tgt_callsign = st.text_input("Target Callsign", value="TGT01")
 st.subheader("Ownship Aircraft Parameters")
 
 tcpa_mmss = st.text_input("TCPA (mm:ss)", value="01:00")
+post_cpa_time_mmss = st.text_input("Post-CPA Time (mm:ss)", value="10:00")
+
 cpa_dist_ft = st.number_input("CPA Distance (ft)", value=20)
 
 os_lat = st.number_input("Ownship Latitude", value=37.618805, format="%.6f")
@@ -183,6 +185,8 @@ if st.button("Generate Plan Files"):
         st.session_state.files_generated = True
 
         tcpa_sec = mmss_to_sec(tcpa_mmss)
+        post_cpa_sec = mmss_to_sec(post_cpa_mmss)
+        
 
         cpa_dist_m = ft_to_m(cpa_dist_ft)
         os_alt_m = ft_to_m(os_alt_ft)
@@ -205,6 +209,7 @@ if st.button("Generate Plan Files"):
             conflict_dh_m=conflict_dh_m,
             target_alto_m=tgt_alt_offset_m,
             relative_heading_deg=relative_heading
+            post_cpa_sec=post_cpa_sec
         )
         
         import pandas as pd
