@@ -291,8 +291,8 @@ if st.button("Generate Plan Files"):
         write_kml_file(target_kml, [points["tgt_start"], points["tgt_cpa"]])
 
         write_combined_kml_file(combined_kml,
-                               [points["os_start"], points["os_cpa"]],
-                               [points["tgt_start"], points["tgt_cpa"]])
+                               [points["os_start"], points["os_cpa"], points["os_end"]],
+                               [points["tgt_start"], points["tgt_cpa"], points["tgt_end"]])
 
         write_yaml_file(
             path=ownship_yaml,
