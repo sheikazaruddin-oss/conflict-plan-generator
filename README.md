@@ -29,11 +29,18 @@ The application generates the following files:
 ------------------------------------------------------------
 Input Parameters
 ------------------------------------------------------------
+**CallSigns**
+
+Ownship Callsign
+Target Callsign
 
 **Encounter Geometry**
 
 TCPA (mm:ss):
 Time to Closest Point of Approach
+
+Post-CPA Time (mm:ss):
+fly Time beyond CPA
 
 CPA Distance (ft):
 Horizontal separation between Ownship and Target at CPA
@@ -121,7 +128,7 @@ Use either:
 Step 4 — Run the Generator
 
 ```
-python app.py --os_callsign OS12 --tgt_callsign TGT51 --tcpa 01:00 --cpa 20 --os_lat 37.618805 --os_lon -122.375416 --os_alt 50 --os_course 90 --os_speed 20 --os_vspeed 1 --rel_speed 10 --conflict_dh 30 --tgt_alto 100 --relative_heading 95
+python app.py --os_callsign OS12 --tgt_callsign TGT51 --tcpa 01:00 --post_cpa 00:30 --cpa 20 --os_lat 37.618805 --os_lon -122.375416 --os_alt 50 --os_course 90 --os_speed 20 --os_vspeed 1 --rel_speed 10 --conflict_dh 30 --tgt_alto 100 --relative_heading 95
 ```
 
 Step 5 — Output Files
