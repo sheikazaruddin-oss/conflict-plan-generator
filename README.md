@@ -24,6 +24,7 @@ The application generates the following files:
 7. ownship.yaml
 8. target.yaml
 9. scenario_log.json
+10. positions.csv
 
 
 ------------------------------------------------------------
