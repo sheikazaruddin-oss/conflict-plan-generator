@@ -16,9 +16,9 @@ def mmss_to_sec(mmss):
     return int(m) * 60 + int(s)
 
 
-# ----------------------------
+# -------------------------------------------------
 # ARGUMENTS
-# ----------------------------
+# -------------------------------------------------
 
 parser = argparse.ArgumentParser()
 
@@ -26,6 +26,8 @@ parser.add_argument("--os_callsign", default="OWN01")
 parser.add_argument("--tgt_callsign", default="TGT01")
 
 parser.add_argument("--tcpa", default="01:00")
+parser.add_argument("--post_cpa", default="10:00")   # ✅ ADDED
+
 parser.add_argument("--cpa", type=float, default=20)
 
 parser.add_argument("--os_lat", type=float, required=True)
@@ -44,11 +46,12 @@ parser.add_argument("--relative_heading", type=float, default=95)
 args = parser.parse_args()
 
 
-# ----------------------------
+# -------------------------------------------------
 # CONVERSIONS
-# ----------------------------
+# -------------------------------------------------
 
 tcpa_sec = mmss_to_sec(args.tcpa)
+post_cpa_sec = mmss_to_sec(args.post_cpa)   # ✅ ADDED
 
 points = compute_conflict_geometry(
     tcpa_sec=tcpa_sec,
@@ -62,8 +65,14 @@ points = compute_conflict_geometry(
     rel_speed_mps=kt_to_mps(args.rel_speed),
     conflict_dh_m=ft_to_m(args.conflict_dh),
     target_alto_m=ft_to_m(args.tgt_alto),
-    relative_heading_deg=args.relative_heading
+    relative_heading_deg=args.relative_heading,
+    post_cpa_sec=post_cpa_sec   # ✅ ADDED
 )
+
+
+# -------------------------------------------------
+# POSITIONS CSV (UPDATED ONLY END POINTS)
+# -------------------------------------------------
 
 import pandas as pd
 
@@ -72,9 +81,12 @@ positions_df = pd.DataFrame([
         "start_lat": points["os_start"][0],
         "start_lon": points["os_start"][1],
         "start_alt": args.os_alt,
-        "end_lat": points["os_cpa"][0],
-        "end_lon": points["os_cpa"][1],
-        "end_alt": args.os_alt,
+
+        # ✅ FIXED (USE END NOT CPA)
+        "end_lat": points["os_end"][0],
+        "end_lon": points["os_end"][1],
+        "end_alt": round(m_to_ft(points["os_end"][2]), 2),
+
         "gspeed": args.os_speed,
         "vspeed": args.os_vspeed,
         "course": args.os_course
@@ -83,9 +95,12 @@ positions_df = pd.DataFrame([
         "start_lat": points["tgt_start"][0],
         "start_lon": points["tgt_start"][1],
         "start_alt": round(m_to_ft(points["tgt_start"][2]), 2),
-        "end_lat": points["tgt_cpa"][0],
-        "end_lon": points["tgt_cpa"][1],
-        "end_alt": round(m_to_ft(points["tgt_cpa"][2]), 2),
+
+        # ✅ FIXED (USE END NOT CPA)
+        "end_lat": points["tgt_end"][0],
+        "end_lon": points["tgt_end"][1],
+        "end_alt": round(m_to_ft(points["tgt_end"][2]), 2),
+
         "gspeed": args.rel_speed,
         "vspeed": 0.0,
         "course": points["tgt_course_deg"]
@@ -95,9 +110,11 @@ positions_df = pd.DataFrame([
 positions_df.to_csv("positions.csv", index=False)
 
 print("positions.csv generated successfully")
-# ----------------------------
+
+
+# -------------------------------------------------
 # FILE NAMES
-# ----------------------------
+# -------------------------------------------------
 
 ownship_prefix = f"Ownship_{args.os_callsign}"
 target_prefix = f"Target_{args.tgt_callsign}"
@@ -117,30 +134,31 @@ target_kml = f"{target_prefix}.kml"
 combined_kml = f"{ownship_prefix}_{target_prefix}.kml"
 
 
-# ----------------------------
-# WRITE FILES
-# ----------------------------
+# -------------------------------------------------
+# WRITE FILES (UPDATED TO INCLUDE END)
+# -------------------------------------------------
 
 home = points["os_start"]
 
-write_plan_file(ownship_plan, [points["os_start"], points["os_cpa"]], home)
-write_plan_file(target_plan, [points["tgt_start"], points["tgt_cpa"]], home)
+write_plan_file(ownship_plan, [points["os_start"], points["os_cpa"], points["os_end"]], home)
+write_plan_file(target_plan, [points["tgt_start"], points["tgt_cpa"], points["tgt_end"]], home)
 
-write_waypoints_file(ownship_wp, [points["os_start"], points["os_cpa"]])
-write_waypoints_file(target_wp, [points["tgt_start"], points["tgt_cpa"]])
+write_waypoints_file(ownship_wp, [points["os_start"], points["os_cpa"], points["os_end"]])
+write_waypoints_file(target_wp, [points["tgt_start"], points["tgt_cpa"], points["tgt_end"]])
 
-write_kml_file(ownship_kml, [points["os_start"], points["os_cpa"]])
-write_kml_file(target_kml, [points["tgt_start"], points["tgt_cpa"]])
+write_kml_file(ownship_kml, [points["os_start"], points["os_cpa"], points["os_end"]])
+write_kml_file(target_kml, [points["tgt_start"], points["tgt_cpa"], points["tgt_end"]])
 
 write_combined_kml_file(
     combined_kml,
-    [points["os_start"], points["os_cpa"]],
-    [points["tgt_start"], points["tgt_cpa"]]
+    [points["os_start"], points["os_cpa"], points["os_end"]],
+    [points["tgt_start"], points["tgt_cpa"], points["tgt_end"]]
 )
 
-# ----------------------------
+
+# -------------------------------------------------
 # YAML
-# ----------------------------
+# -------------------------------------------------
 
 write_yaml_file(
     path=ownship_yaml,
