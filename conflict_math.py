@@ -14,6 +14,19 @@ def meters_to_latlon(lato_deg, lono_deg, dx_m, dy_m):
     return lat, lon
 
 
+def latlon_to_local_m(ref_lat_deg, ref_lon_deg, lat_deg, lon_deg):
+    R = 6378137.0
+    ref_lat_rad = math.radians(ref_lat_deg)
+
+    dlat = math.radians(lat_deg - ref_lat_deg)
+    dlon = math.radians(lon_deg - ref_lon_deg)
+
+    dy_m = dlat * R
+    dx_m = dlon * R * math.cos(ref_lat_rad)
+
+    return dx_m, dy_m
+
+
 def compute_conflict_geometry(
     tcpa_sec,
     cpa_horiz_m,
@@ -171,3 +184,75 @@ def compute_conflict_geometry(
             "vz_tgt": vz_tgt,
         }
     )
+
+
+# ============================================================
+# TYPE 2
+# Given:
+# - line path of ownship (start/end lat/lon)
+# - velocity of ownship
+# - line path of target (start/end lat/lon)
+# - velocity of target
+# - tcpa
+# - cpa location
+#
+# Calculate:
+# - initial position of ownship
+# - initial position of target
+# - ownship course
+# - target course
+# ============================================================
+
+def compute_initial_positions_type2(
+    tcpa_sec,
+    cpa_lat,
+    cpa_lon,
+    os_s_lat, os_s_lon, os_e_lat, os_e_lon,
+    tgt_s_lat, tgt_s_lon, tgt_e_lat, tgt_e_lon,
+    os_speed_mps,
+    tgt_speed_mps
+):
+    # Ownship line direction
+    os_dx_line, os_dy_line = latlon_to_local_m(cpa_lat, cpa_lon, os_e_lat, os_e_lon)
+    os_mag = math.hypot(os_dx_line, os_dy_line)
+    if os_mag < 1e-9:
+        raise ValueError("Ownship path start/end cannot be identical")
+
+    os_ux = os_dx_line / os_mag
+    os_uy = os_dy_line / os_mag
+
+    # Target line direction
+    tgt_dx_line, tgt_dy_line = latlon_to_local_m(cpa_lat, cpa_lon, tgt_e_lat, tgt_e_lon)
+    tgt_mag = math.hypot(tgt_dx_line, tgt_dy_line)
+    if tgt_mag < 1e-9:
+        raise ValueError("Target path start/end cannot be identical")
+
+    tgt_ux = tgt_dx_line / tgt_mag
+    tgt_uy = tgt_dy_line / tgt_mag
+
+    # Reverse from CPA by tcpa to find initial positions
+    os_back_dx = os_ux * os_speed_mps * tcpa_sec
+    os_back_dy = os_uy * os_speed_mps * tcpa_sec
+
+    tgt_back_dx = tgt_ux * tgt_speed_mps * tcpa_sec
+    tgt_back_dy = tgt_uy * tgt_speed_mps * tcpa_sec
+
+    os_init_lat, os_init_lon = meters_to_latlon(
+        cpa_lat, cpa_lon,
+        -os_back_dx, -os_back_dy
+    )
+
+    tgt_init_lat, tgt_init_lon = meters_to_latlon(
+        cpa_lat, cpa_lon,
+        -tgt_back_dx, -tgt_back_dy
+    )
+
+    os_course_deg = (math.degrees(math.atan2(os_ux, os_uy)) + 360.0) % 360.0
+    tgt_course_deg = (math.degrees(math.atan2(tgt_ux, tgt_uy)) + 360.0) % 360.0
+
+    return {
+        "os_init": (os_init_lat, os_init_lon),
+        "tgt_init": (tgt_init_lat, tgt_init_lon),
+        "os_course_deg": os_course_deg,
+        "tgt_course_deg": tgt_course_deg
+    }

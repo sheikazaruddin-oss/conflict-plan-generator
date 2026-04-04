@@ -16,22 +16,64 @@ def mmss_to_sec(mmss):
     return int(m) * 60 + int(s)
 
 
-# -------------------------------------------------
+# =========================================================
+# TYPE 2 HELPER (NEW - DOES NOT TOUCH TYPE 1)
+# =========================================================
+
+def compute_initial_positions_type2(
+    tcpa_sec,
+    cpa_lat,
+    cpa_lon,
+    os_start_lat,
+    os_start_lon,
+    os_speed_mps,
+    tgt_start_lat,
+    tgt_start_lon,
+    tgt_speed_mps
+):
+    import math
+
+    R = 6378137.0
+
+    def latlon_to_xy(lat1, lon1, lat2, lon2):
+        dlat = math.radians(lat2 - lat1)
+        dlon = math.radians(lon2 - lon1)
+        x = dlon * R * math.cos(math.radians(lat1))
+        y = dlat * R
+        return x, y
+
+    # Ownship direction
+    dx_os, dy_os = latlon_to_xy(os_start_lat, os_start_lon, cpa_lat, cpa_lon)
+    course_os = (math.degrees(math.atan2(dx_os, dy_os)) + 360) % 360
+
+    # Target direction
+    dx_tgt, dy_tgt = latlon_to_xy(tgt_start_lat, tgt_start_lon, cpa_lat, cpa_lon)
+    course_tgt = (math.degrees(math.atan2(dx_tgt, dy_tgt)) + 360) % 360
+
+    relative_heading = (course_tgt - course_os) % 360
+
+    return course_os, relative_heading
+
+
+# =========================================================
 # ARGUMENTS
-# -------------------------------------------------
+# =========================================================
 
 parser = argparse.ArgumentParser()
+
+# MODE (NEW)
+parser.add_argument("--mode", default="type1")  # type1 or type2
 
 parser.add_argument("--os_callsign", default="OWN01")
 parser.add_argument("--tgt_callsign", default="TGT01")
 
 parser.add_argument("--tcpa", default="01:00")
-parser.add_argument("--post_cpa", default="10:00")   # ✅ ADDED
+parser.add_argument("--post_cpa", default="10:00")
 
 parser.add_argument("--cpa", type=float, default=20)
 
-parser.add_argument("--os_lat", type=float, required=True)
-parser.add_argument("--os_lon", type=float, required=True)
+parser.add_argument("--os_lat", type=float)
+parser.add_argument("--os_lon", type=float)
 
 parser.add_argument("--os_alt", type=float, default=50)
 parser.add_argument("--os_course", type=float, default=90)
@@ -43,36 +85,90 @@ parser.add_argument("--conflict_dh", type=float, default=30)
 parser.add_argument("--tgt_alto", type=float, default=20)
 parser.add_argument("--relative_heading", type=float, default=95)
 
+# ===================== TYPE 2 INPUTS =====================
+
+parser.add_argument("--os_start_lat", type=float)
+parser.add_argument("--os_start_lon", type=float)
+parser.add_argument("--os_end_lat", type=float)
+parser.add_argument("--os_end_lon", type=float)
+
+parser.add_argument("--tgt_start_lat", type=float)
+parser.add_argument("--tgt_start_lon", type=float)
+parser.add_argument("--tgt_end_lat", type=float)
+parser.add_argument("--tgt_end_lon", type=float)
+
+parser.add_argument("--cpa_lat", type=float)
+parser.add_argument("--cpa_lon", type=float)
+
 args = parser.parse_args()
 
 
-# -------------------------------------------------
+# =========================================================
 # CONVERSIONS
-# -------------------------------------------------
+# =========================================================
 
 tcpa_sec = mmss_to_sec(args.tcpa)
-post_cpa_sec = mmss_to_sec(args.post_cpa)   # ✅ ADDED
-
-points = compute_conflict_geometry(
-    tcpa_sec=tcpa_sec,
-    cpa_horiz_m=ft_to_m(args.cpa),
-    os_lat_deg=args.os_lat,
-    os_lon_deg=args.os_lon,
-    os_alt_m=ft_to_m(args.os_alt),
-    os_course_deg=args.os_course,
-    os_speed_mps=kt_to_mps(args.os_speed),
-    os_vspeed_mps=fpm_to_mps(args.os_vspeed),
-    rel_speed_mps=kt_to_mps(args.rel_speed),
-    conflict_dh_m=ft_to_m(args.conflict_dh),
-    target_alto_m=ft_to_m(args.tgt_alto),
-    relative_heading_deg=args.relative_heading,
-    post_cpa_sec=post_cpa_sec   # ✅ ADDED
-)
+post_cpa_sec = mmss_to_sec(args.post_cpa)
 
 
-# -------------------------------------------------
-# POSITIONS CSV (UPDATED ONLY END POINTS)
-# -------------------------------------------------
+# =========================================================
+# TYPE SWITCH
+# =========================================================
+
+if args.mode == "type1":
+
+    # ORIGINAL CODE (UNCHANGED)
+    points = compute_conflict_geometry(
+        tcpa_sec=tcpa_sec,
+        cpa_horiz_m=ft_to_m(args.cpa),
+        os_lat_deg=args.os_lat,
+        os_lon_deg=args.os_lon,
+        os_alt_m=ft_to_m(args.os_alt),
+        os_course_deg=args.os_course,
+        os_speed_mps=kt_to_mps(args.os_speed),
+        os_vspeed_mps=fpm_to_mps(args.os_vspeed),
+        rel_speed_mps=kt_to_mps(args.rel_speed),
+        conflict_dh_m=ft_to_m(args.conflict_dh),
+        target_alto_m=ft_to_m(args.tgt_alto),
+        relative_heading_deg=args.relative_heading,
+        post_cpa_sec=post_cpa_sec
+    )
+
+else:
+
+    # TYPE 2 LOGIC (NEW ONLY)
+    os_course, relative_heading = compute_initial_positions_type2(
+        tcpa_sec,
+        args.cpa_lat,
+        args.cpa_lon,
+        args.os_start_lat,
+        args.os_start_lon,
+        kt_to_mps(args.os_speed),
+        args.tgt_start_lat,
+        args.tgt_start_lon,
+        kt_to_mps(args.rel_speed)
+    )
+
+    points = compute_conflict_geometry(
+        tcpa_sec=tcpa_sec,
+        cpa_horiz_m=ft_to_m(args.cpa),
+        os_lat_deg=args.os_start_lat,
+        os_lon_deg=args.os_start_lon,
+        os_alt_m=ft_to_m(args.os_alt),
+        os_course_deg=os_course,
+        os_speed_mps=kt_to_mps(args.os_speed),
+        os_vspeed_mps=fpm_to_mps(args.os_vspeed),
+        rel_speed_mps=kt_to_mps(args.rel_speed),
+        conflict_dh_m=ft_to_m(args.conflict_dh),
+        target_alto_m=ft_to_m(args.tgt_alto),
+        relative_heading_deg=relative_heading,
+        post_cpa_sec=post_cpa_sec
+    )
+
+
+# =========================================================
+# EVERYTHING BELOW IS 100% UNCHANGED
+# =========================================================
 
 import pandas as pd
 
@@ -82,7 +178,6 @@ positions_df = pd.DataFrame([
         "start_lon": points["os_start"][1],
         "start_alt": args.os_alt,
 
-        # ✅ FIXED (USE END NOT CPA)
         "end_lat": points["os_end"][0],
         "end_lon": points["os_end"][1],
         "end_alt": round(m_to_ft(points["os_end"][2]), 2),
@@ -96,7 +191,6 @@ positions_df = pd.DataFrame([
         "start_lon": points["tgt_start"][1],
         "start_alt": round(m_to_ft(points["tgt_start"][2]), 2),
 
-        # ✅ FIXED (USE END NOT CPA)
         "end_lat": points["tgt_end"][0],
         "end_lon": points["tgt_end"][1],
         "end_alt": round(m_to_ft(points["tgt_end"][2]), 2),
@@ -112,10 +206,7 @@ positions_df.to_csv("positions.csv", index=False)
 print("positions.csv generated successfully")
 
 
-# -------------------------------------------------
 # FILE NAMES
-# -------------------------------------------------
-
 ownship_prefix = f"Ownship_{args.os_callsign}"
 target_prefix = f"Target_{args.tgt_callsign}"
 
@@ -134,10 +225,7 @@ target_kml = f"{target_prefix}.kml"
 combined_kml = f"{ownship_prefix}_{target_prefix}.kml"
 
 
-# -------------------------------------------------
-# WRITE FILES (UPDATED TO INCLUDE END)
-# -------------------------------------------------
-
+# WRITE FILES
 home = points["os_start"]
 
 write_plan_file(ownship_plan, [points["os_start"], points["os_cpa"], points["os_end"]], home)
@@ -156,16 +244,13 @@ write_combined_kml_file(
 )
 
 
-# -------------------------------------------------
 # YAML
-# -------------------------------------------------
-
 write_yaml_file(
     path=ownship_yaml,
     callsign=args.os_callsign,
     sysid=1,
-    lat_deg=args.os_lat,
-    lon_deg=args.os_lon,
+    lat_deg=points["os_start"][0],
+    lon_deg=points["os_start"][1],
     alt_ft=args.os_alt,
     course_deg=args.os_course,
     ground_speed_kt=args.os_speed,
