@@ -467,7 +467,7 @@ with tab2:
     # TYPE 2 INPUTS
     # -------------------------------------------------
 
-    st.subheader("Type 2 Ownship Path Inputs")
+    st.subheader("Ownship Path Inputs")
 
     tcpa_mmss_t2 = st.text_input("TCPA (mm:ss)", value="01:00", key="t2_tcpa")
     post_cpa_mmss_t2 = st.text_input("Post-CPA Time (mm:ss)", value="10:00", key="t2_post_cpa")
@@ -484,7 +484,7 @@ with tab2:
     os_alt_ft_t2 = st.number_input("Ownship Altitude (ft)", value=50.0, key="t2_os_alt")
     os_vspeed_fpm_t2 = st.number_input("Ownship Vertical Speed (ft/min)", value=0.0, key="t2_os_vspeed")
 
-    st.subheader("Type 2 Target Path Inputs")
+    st.subheader("Target Path Inputs")
 
     tgt_path_start_lat = st.number_input("Target Path Start Latitude", value=37.630000, format="%.6f", key="t2_tgt_path_start_lat")
     tgt_path_start_lon = st.number_input("Target Path Start Longitude", value=-122.360000, format="%.6f", key="t2_tgt_path_start_lon")
@@ -500,7 +500,7 @@ with tab2:
     # GENERATE FILES
     # -------------------------------------------------
 
-    if st.button("Generate Plan Files"):
+    if st.button("Generate Type 2 Plan Files"):
 
         try:
 
@@ -591,7 +591,7 @@ with tab2:
                 }
             ])
 
-            positions_df_t2.to_csv("positions.csv", index=False)
+            positions_df_t2.to_csv("positions_type2.csv", index=False)
 
             save_validation_log(
                 "scenario_log_type2.json",
@@ -705,7 +705,7 @@ with tab2:
         combined_kml_t2 = f"Ownship_{os_callsign_t2}_Target_{tgt_callsign_t2}.kml"
 
         st.markdown("---")
-        st.subheader(" .PLAN FILES")
+        st.subheader(".PLAN FILES")
 
         plan_zip_t2 = io.BytesIO()
 
@@ -716,7 +716,7 @@ with tab2:
         st.download_button("Download Plan Files", plan_zip_t2.getvalue(), "type2_plan_files.zip", key="t2_plan")
 
         st.markdown("---")
-        st.subheader(" .WAYPOINT FILES")
+        st.subheader(".WAYPOINT FILES")
 
         wp_zip_t2 = io.BytesIO()
 
@@ -727,7 +727,7 @@ with tab2:
         st.download_button("Download Waypoint Files", wp_zip_t2.getvalue(), "type2_waypoints.zip", key="t2_wp")
 
         st.markdown("---")
-        st.subheader(" .YAML FILES")
+        st.subheader(".YAML FILES")
 
         yaml_zip_t2 = io.BytesIO()
 
@@ -736,7 +736,7 @@ with tab2:
             z.write(target_yaml_t2)
 
         st.download_button(
-            "Download Type 2 YAML Files",
+            "Download YAML Files",
             data=yaml_zip_t2.getvalue(),
             file_name="type2_yaml_files.zip",
             mime="application/zip",
@@ -744,7 +744,7 @@ with tab2:
         )
 
         st.markdown("---")
-        st.subheader(" .KML FILES")
+        st.subheader(".KML FILES")
 
         kml_zip_t2 = io.BytesIO()
 
@@ -754,24 +754,24 @@ with tab2:
             z.write(combined_kml_t2)
 
         st.download_button(
-            "Download Type 2 KML Files",
+            "Download KML Files",
             data=kml_zip_t2.getvalue(),
             file_name="type2_kml_files.zip",
             mime="application/zip",
             key="t2_kml"
         )
 
-        with open("scenario_log.json", "rb") as f:
+        with open("scenario_log_type2.json", "rb") as f:
             st.markdown("---")
-            st.subheader("Type 2 VALIDATION LOG")
-            st.download_button("Download Validation Log", f, "scenario_log_type2.json", key="t2_log")
+            st.subheader("VALIDATION LOG")
+            st.download_button("Validation Log", f, "scenario_log_type2.json", key="t2_log")
 
         st.markdown("---")
-        st.subheader(" POSITIONS FILE (FOR WORLD PLOT)")
+        st.subheader("Type 2 POSITIONS FILE (FOR WORLD PLOT)")
 
         with open("positions_type2.csv", "rb") as f:
             st.download_button(
-                "Download Type 2 positions.csv",
+                "Download positions.csv",
                 data=f,
                 file_name="positions_type2.csv",
                 mime="text/csv",
