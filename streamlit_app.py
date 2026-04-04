@@ -500,7 +500,7 @@ with tab2:
     # GENERATE FILES
     # -------------------------------------------------
 
-    if st.button("Generate Plan Files"):
+    if st.button("Generate Type 2 Plan Files"):
 
         try:
 
@@ -771,7 +771,7 @@ with tab2:
 
         with open("positions_type2.csv", "rb") as f:
             st.download_button(
-                "Download positions.csv",
+                "Download Type 2 positions.csv",
                 data=f,
                 file_name="positions_type2.csv",
                 mime="text/csv",
