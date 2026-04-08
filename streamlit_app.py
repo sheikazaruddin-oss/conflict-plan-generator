@@ -713,7 +713,7 @@ with tab2:
             z.write(ownship_plan_t2)
             z.write(target_plan_t2)
 
-        st.download_button("Download Plan Files", plan_zip_t2.getvalue(), "type2_plan_files.zip", key="t2_plan")
+        st.download_button("Download Plan Files", plan_zip_t2.getvalue(), "plan_files.zip", key="t2_plan")
 
         st.markdown("---")
         st.subheader(".WAYPOINT FILES")
@@ -724,7 +724,7 @@ with tab2:
             z.write(ownship_wp_t2)
             z.write(target_wp_t2)
 
-        st.download_button("Download Waypoint Files", wp_zip_t2.getvalue(), "type2_waypoints.zip", key="t2_wp")
+        st.download_button("Download Waypoint Files", wp_zip_t2.getvalue(), "waypoints.zip", key="t2_wp")
 
         st.markdown("---")
         st.subheader(".YAML FILES")
@@ -738,7 +738,7 @@ with tab2:
         st.download_button(
             "Download YAML Files",
             data=yaml_zip_t2.getvalue(),
-            file_name="type2_yaml_files.zip",
+            file_name="yaml_files.zip",
             mime="application/zip",
             key="t2_yaml"
         )
@@ -756,7 +756,7 @@ with tab2:
         st.download_button(
             "Download KML Files",
             data=kml_zip_t2.getvalue(),
-            file_name="type2_kml_files.zip",
+            file_name="kml_files.zip",
             mime="application/zip",
             key="t2_kml"
         )
@@ -764,7 +764,7 @@ with tab2:
         with open("scenario_log_type2.json", "rb") as f:
             st.markdown("---")
             st.subheader("VALIDATION LOG")
-            st.download_button("Validation Log", f, "scenario_log_type2.json", key="t2_log")
+            st.download_button("Validation Log", f, "scenario_log.json", key="t2_log")
 
         st.markdown("---")
         st.subheader("POSITIONS FILE (FOR WORLD PLOT)")
@@ -773,7 +773,7 @@ with tab2:
             st.download_button(
                 "Download positions.csv",
                 data=f,
-                file_name="positions_type2.csv",
+                file_name="positions.csv",
                 mime="text/csv",
                 key="t2_csv"
             )
