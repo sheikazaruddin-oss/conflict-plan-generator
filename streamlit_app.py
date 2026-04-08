@@ -500,7 +500,7 @@ with tab2:
     # GENERATE FILES
     # -------------------------------------------------
 
-    if st.button("Generate Plan Files"):
+    if st.button("Generate Plan File"):
 
         try:
 
