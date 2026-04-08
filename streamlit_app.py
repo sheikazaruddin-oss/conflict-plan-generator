@@ -142,7 +142,7 @@ st.set_page_config(page_title="Conflict Plan Generator")
 
 st.title("✈ Conflict Plan Generator")
 
-tab1, tab2 = st.tabs(["Type 1", "Type 2"])
+tab1, tab2 = st.tabs(["TCT", "TCT+"])
 
 
 # =========================================================
@@ -500,7 +500,7 @@ with tab2:
     # GENERATE FILES
     # -------------------------------------------------
 
-    if st.button("Generate Type 2 Plan Files"):
+    if st.button("Generate Plan Files"):
 
         try:
 
@@ -767,11 +767,11 @@ with tab2:
             st.download_button("Validation Log", f, "scenario_log_type2.json", key="t2_log")
 
         st.markdown("---")
-        st.subheader("Type 2 POSITIONS FILE (FOR WORLD PLOT)")
+        st.subheader("POSITIONS FILE (FOR WORLD PLOT)")
 
         with open("positions_type2.csv", "rb") as f:
             st.download_button(
-                "Download Type 2 positions.csv",
+                "Download positions.csv",
                 data=f,
                 file_name="positions_type2.csv",
                 mime="text/csv",
