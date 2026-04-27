@@ -130,8 +130,8 @@ def compute_conflict_geometry(
     tgt_post_dy = vy_tgt * post_cpa_sec
     tgt_post_dz = vz_tgt * post_cpa_sec
 
-    tgt_total_dx = tgt_cpa_dx + tgt_post_dx
-    tgt_total_dy = tgt_cpa_dy + tgt_post_dy
+    tgt_total_dx = r0_x + dx_tgt + tgt_post_dx
+    tgt_total_dy = r0_y + dy_tgt + tgt_post_dy
 
     tgt_end_lat, tgt_end_lon = meters_to_latlon(os_lat_deg, os_lon_deg, tgt_total_dx, tgt_total_dy)
     tgt_end_alt = tgt_alt_cpa + tgt_post_dz
