@@ -40,7 +40,8 @@ def compute_conflict_geometry(
     conflict_dh_m,
     target_alto_m,
     relative_heading_deg,
-    post_cpa_sec=0
+    post_cpa_sec=0,
+    use_direct_tgt_speed=False   # ✅ ONLY ADDITION
 ):
 
     os_course_rad = math.radians(os_course_deg % 360.0)
@@ -58,7 +59,14 @@ def compute_conflict_geometry(
     tgt_course_deg = (os_course_deg + (relative_heading_deg % 360.0)) % 360.0
     tgt_course_rad = math.radians(tgt_course_deg)
 
-    tgt_speed_mps = os_speed_mps + rel_speed_mps
+    # ============================================================
+    # ✅ FIX: TYPE 1 + TYPE 2 SUPPORT
+    # ============================================================
+    if use_direct_tgt_speed:
+        tgt_speed_mps = rel_speed_mps
+    else:
+        tgt_speed_mps = os_speed_mps + rel_speed_mps
+    # ============================================================
 
     vx_tgt = tgt_speed_mps * math.sin(tgt_course_rad)
     vy_tgt = tgt_speed_mps * math.cos(tgt_course_rad)
@@ -110,10 +118,9 @@ def compute_conflict_geometry(
     tgt_cpa = (tgt_cpa_lat, tgt_cpa_lon, tgt_alt_cpa)
 
     # ============================================================
-    # ✅ FIXED POST-CPA CONTINUATION (ONLY CHANGE)
+    # POST-CPA CONTINUATION
     # ============================================================
 
-    # Ownship continues forward AFTER CPA
     os_post_dx = vx_os * post_cpa_sec
     os_post_dy = vy_os * post_cpa_sec
     os_post_dz = vz_os * post_cpa_sec
@@ -125,7 +132,6 @@ def compute_conflict_geometry(
     os_end_alt = os_alt_cpa + os_post_dz
     os_end = (os_end_lat, os_end_lon, os_end_alt)
 
-    # Target continues forward AFTER CPA
     tgt_post_dx = vx_tgt * post_cpa_sec
     tgt_post_dy = vy_tgt * post_cpa_sec
     tgt_post_dz = vz_tgt * post_cpa_sec
@@ -155,104 +161,30 @@ def compute_conflict_geometry(
     print("Vertical CPA Separation (ft):", round(m_to_ft(cpa_sep_vert_m), 3))
     print("3D CPA Separation (ft):", round(m_to_ft(cpa_sep_3d_m), 3))
 
-    return (
-        {
-            "os_start": os_start,
-            "os_cpa": os_cpa,
-            "os_end": os_end,
-
-            "tgt_start": tgt_start,
-            "tgt_cpa": tgt_cpa,
-            "tgt_end": tgt_end,
-
-            "tgt_course_deg": tgt_course_deg,
-            "cpa_sep_horiz_m": cpa_sep_horiz_m,
-            "cpa_sep_vert_m": cpa_sep_vert_m,
-            "cpa_sep_3d_m": cpa_sep_3d_m,
-            "os_speed_mps": os_speed_mps,
-            "os_vspeed_mps": os_vspeed_mps,
-            "os_course_deg": os_course_deg,
-
-            "tgt_speed_mps": tgt_speed_mps,
-            "tgt_course_deg": tgt_course_deg,
-
-            "vx_os": vx_os,
-            "vy_os": vy_os,
-            "vz_os": vz_os,
-            "vx_tgt": vx_tgt,
-            "vy_tgt": vy_tgt,
-            "vz_tgt": vz_tgt,
-        }
-    )
-
-
-# ============================================================
-# TYPE 2
-# Given:
-# - line path of ownship (start/end lat/lon)
-# - velocity of ownship
-# - line path of target (start/end lat/lon)
-# - velocity of target
-# - tcpa
-# - cpa location
-#
-# Calculate:
-# - initial position of ownship
-# - initial position of target
-# - ownship course
-# - target course
-# ============================================================
-
-def compute_initial_positions_type2(
-    tcpa_sec,
-    cpa_lat,
-    cpa_lon,
-    os_s_lat, os_s_lon, os_e_lat, os_e_lon,
-    tgt_s_lat, tgt_s_lon, tgt_e_lat, tgt_e_lon,
-    os_speed_mps,
-    tgt_speed_mps
-):
-    # Ownship line direction
-    os_dx_line, os_dy_line = latlon_to_local_m(cpa_lat, cpa_lon, os_e_lat, os_e_lon)
-    os_mag = math.hypot(os_dx_line, os_dy_line)
-    if os_mag < 1e-9:
-        raise ValueError("Ownship path start/end cannot be identical")
-
-    os_ux = os_dx_line / os_mag
-    os_uy = os_dy_line / os_mag
-
-    # Target line direction
-    tgt_dx_line, tgt_dy_line = latlon_to_local_m(cpa_lat, cpa_lon, tgt_e_lat, tgt_e_lon)
-    tgt_mag = math.hypot(tgt_dx_line, tgt_dy_line)
-    if tgt_mag < 1e-9:
-        raise ValueError("Target path start/end cannot be identical")
-
-    tgt_ux = tgt_dx_line / tgt_mag
-    tgt_uy = tgt_dy_line / tgt_mag
-
-    # Reverse from CPA by tcpa to find initial positions
-    os_back_dx = os_ux * os_speed_mps * tcpa_sec
-    os_back_dy = os_uy * os_speed_mps * tcpa_sec
-
-    tgt_back_dx = tgt_ux * tgt_speed_mps * tcpa_sec
-    tgt_back_dy = tgt_uy * tgt_speed_mps * tcpa_sec
-
-    os_init_lat, os_init_lon = meters_to_latlon(
-        cpa_lat, cpa_lon,
-        -os_back_dx, -os_back_dy
-    )
-
-    tgt_init_lat, tgt_init_lon = meters_to_latlon(
-        cpa_lat, cpa_lon,
-        -tgt_back_dx, -tgt_back_dy
-    )
-
-    os_course_deg = (math.degrees(math.atan2(os_ux, os_uy)) + 360.0) % 360.0
-    tgt_course_deg = (math.degrees(math.atan2(tgt_ux, tgt_uy)) + 360.0) % 360.0
-
     return {
-        "os_init": (os_init_lat, os_init_lon),
-        "tgt_init": (tgt_init_lat, tgt_init_lon),
+        "os_start": os_start,
+        "os_cpa": os_cpa,
+        "os_end": os_end,
+
+        "tgt_start": tgt_start,
+        "tgt_cpa": tgt_cpa,
+        "tgt_end": tgt_end,
+
+        "tgt_course_deg": tgt_course_deg,
+        "cpa_sep_horiz_m": cpa_sep_horiz_m,
+        "cpa_sep_vert_m": cpa_sep_vert_m,
+        "cpa_sep_3d_m": cpa_sep_3d_m,
+        "os_speed_mps": os_speed_mps,
+        "os_vspeed_mps": os_vspeed_mps,
         "os_course_deg": os_course_deg,
-        "tgt_course_deg": tgt_course_deg
+
+        "tgt_speed_mps": tgt_speed_mps,
+        "tgt_course_deg": tgt_course_deg,
+
+        "vx_os": vx_os,
+        "vy_os": vy_os,
+        "vz_os": vz_os,
+        "vx_tgt": vx_tgt,
+        "vy_tgt": vy_tgt,
+        "vz_tgt": vz_tgt,
     }
