@@ -5,7 +5,7 @@ import io
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from conflict_math import compute_conflict_geometry, compute_initial_positions_type2
+from conflict_math import compute_conflict_geometry
 from plan_writer import write_plan_file, write_waypoints_file, write_kml_file
 from yaml_writer import write_yaml_file
 from units import ft_to_m, m_to_ft, kt_to_mps, mps_to_kt, fpm_to_mps
