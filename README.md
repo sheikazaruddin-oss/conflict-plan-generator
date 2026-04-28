@@ -1,7 +1,7 @@
 CONFLICT GENERATOR APP
 
 The Conflict Plan Generator is a tool that generates aircraft encounter scenarios for simulation and validation.
-It computes the conflict geometry between an Ownship aircraft and a Target aircraft and produces mission and 
+It computes the conflict geometry between an Ownship aircraft and a Target aircraft and produces mission and
 configuration files that can be used with ArduPilot SITL, QGroundControl, and other analysis tools.
 
 The application supports two methods of usage:
@@ -25,6 +25,7 @@ The application generates the following files:
 8. target.yaml
 9. scenario_log.json
 10. positions.csv
+11. ownship_target_combined.kml
 
 
 ------------------------------------------------------------
@@ -47,6 +48,9 @@ CPA Distance (ft):
 Horizontal separation between Ownship and Target at CPA
 
 
+===========================
+TCT (TYPE 1) — PARAMETER BASED
+===========================
 
 **Ownship Parameters**
 
@@ -69,7 +73,6 @@ Ownship Vertical Speed (ft/min):
 Vertical climb/descent rate
 
 
-
 **Target Aircraft Parameters**
 
 Relative Speed (kt):
@@ -85,6 +88,52 @@ Relative Heading (deg):
 Target direction relative to ownship heading
 
 
+===========================
+TCT+ (TYPE 2) — PATH BASED
+===========================
+
+**Ownship Path Inputs**
+
+Ownship Path Start Latitude (deg):
+Starting latitude of ownship path
+
+Ownship Path Start Longitude (deg):
+Starting longitude of ownship path
+
+Ownship Path End Latitude (deg):
+Ending latitude of ownship path
+
+Ownship Path End Longitude (deg):
+Ending longitude of ownship path
+
+Ownship Speed (kt):
+Ground speed of ownship
+
+
+**Target Path Inputs**
+
+Target Path Start Latitude (deg):
+Starting latitude of target path
+
+Target Path Start Longitude (deg):
+Starting longitude of target path
+
+Target Path End Latitude (deg):
+Ending latitude of target path
+
+Target Path End Longitude (deg):
+Ending longitude of target path
+
+Target Speed (kt):
+Ground speed of target
+
+Conflict Relative Altitude (ft):
+Vertical separation between aircraft at CPA
+
+Target Altitude Offset (ft):
+Initial altitude difference between aircraft
+
+
 ------------------------------------------------------------
 Method 1 — Streamlit Web Application
 ------------------------------------------------------------
@@ -92,14 +141,15 @@ Method 1 — Streamlit Web Application
 You can run the generator using the Streamlit web interface.
 
 Streamlit Application Link:
-[https://conflict-plan-generator-myvqvbqxz5r3skenjfd2fj.streamlit.app/](https://conflict-plan-generator-myvvqbqxz5r3skenjfd2fj.streamlit.app/)
+https://conflict-plan-generator-myvvqbqxz5r3skenjfd2fj.streamlit.app/
 
 Steps:
 
 1. Open the Streamlit application.
-2. Enter the required input parameters.
-3. Click Generate Plan Files.
-4. Download the generated files by clicking the file names.
+2. Select the required method (Type 1 or Type 2).
+3. Enter the required input parameters.
+4. Click Generate Plan Files.
+5. Download the generated files by clicking the file names.
 
 
 ------------------------------------------------------------
@@ -108,16 +158,12 @@ Method 2 — Command Line Interface (CLI)
 
 Step 1 — Create a Working Folder
 
-```
 mkdir conflict_plan_generator
 cd conflict_plan_generator
-```
 
 Step 2 — Clone the Repository
 
-```
 git clone https://github.com/sheikazaruddin-oss/conflict-plan-generator.git
-```
 
 Step 3 — Open Terminal
 
@@ -128,30 +174,29 @@ Use either:
 
 Step 4 — Run the Generator
 
-```
+Type 1 — Parameter Based
+
 python app.py --os_callsign OS12 --tgt_callsign TGT51 --tcpa 01:00 --post_cpa 00:30 --cpa 20 --os_lat 37.618805 --os_lon -122.375416 --os_alt 50 --os_course 90 --os_speed 20 --os_vspeed 1 --rel_speed 10 --conflict_dh 30 --tgt_alto 100 --relative_heading 95
-```
+
+
+Type 2 — Path Based
+
+python app.py --mode type2 --os_callsign OS12 --tgt_callsign TGT51 --tcpa 01:00 --post_cpa 00:30 --cpa_lat 37.618805 --cpa_lon -122.375416 --os_s_lat 37.610000 --os_s_lon -122.390000 --os_e_lat 37.630000 --os_e_lon -122.360000 --tgt_s_lat 37.630000 --tgt_s_lon -122.360000 --tgt_e_lat 37.600000 --tgt_e_lon -122.390000 --os_speed 20 --tgt_speed 25 --conflict_dh 30 --tgt_alto 20
+
 
 Step 5 — Output Files
 
 All generated files will appear in the same folder:
 
 ownship.plan
-
 target.plan
-
 ownship.waypoints
-
 target.waypoints
-
 ownship.kml
-
 target.kml
-
 ownship.yaml
-
 target.yaml
-
+ownship_target_combined.kml
 scenario_log.json
 
 
@@ -163,9 +208,7 @@ During simulation, telemetry can be recorded using the provided logger.
 
 Run:
 
-```
 python telemetry_logger.py --mcast-ip 0.0.0.0 --port 14550 --log-file telemetry_log.json
-```
 
 This script will:
 
@@ -182,9 +225,7 @@ Once telemetry has been recorded, validation can be performed.
 
 Run:
 
-```
 python validate_accuracy.py --scenario scenario_log.json --telemetry telemetry_log.json
-```
 
 The validation script compares:
 
@@ -196,11 +237,3 @@ Output includes:
 - Minimum separation observed
 - TCPA error
 - CPA separation error
-
-
-
-
-
-
-
-
