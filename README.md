@@ -47,10 +47,9 @@ fly Time beyond CPA
 CPA Distance (ft):
 Horizontal separation between Ownship and Target at CPA
 
-
-===========================
+-----------------------------
 TCT (TYPE 1) — PARAMETER BASED
-===========================
+-----------------------------
 
 **Ownship Parameters**
 
@@ -88,9 +87,9 @@ Relative Heading (deg):
 Target direction relative to ownship heading
 
 
-===========================
+---------------------------
 TCT+ (TYPE 2) — PATH BASED
-===========================
+---------------------------
 
 **Ownship Path Inputs**
 
@@ -146,7 +145,7 @@ https://conflict-plan-generator-myvvqbqxz5r3skenjfd2fj.streamlit.app/
 Steps:
 
 1. Open the Streamlit application.
-2. Select the required method (Type 1 or Type 2).
+2. Select the required method (TCT or TCT+).
 3. Enter the required input parameters.
 4. Click Generate Plan Files.
 5. Download the generated files by clicking the file names.
@@ -158,12 +157,17 @@ Method 2 — Command Line Interface (CLI)
 
 Step 1 — Create a Working Folder
 
+```
 mkdir conflict_plan_generator
 cd conflict_plan_generator
+```
+
 
 Step 2 — Clone the Repository
 
+```
 git clone https://github.com/sheikazaruddin-oss/conflict-plan-generator.git
+```
 
 Step 3 — Open Terminal
 
@@ -174,15 +178,17 @@ Use either:
 
 Step 4 — Run the Generator
 
-Type 1 — Parameter Based
+TCT — Parameter Based
 
+```
 python app.py --os_callsign OS12 --tgt_callsign TGT51 --tcpa 01:00 --post_cpa 00:30 --cpa 20 --os_lat 37.618805 --os_lon -122.375416 --os_alt 50 --os_course 90 --os_speed 20 --os_vspeed 1 --rel_speed 10 --conflict_dh 30 --tgt_alto 100 --relative_heading 95
+```
 
+TCT+ — Path Based
 
-Type 2 — Path Based
-
+```
 python app.py --mode type2 --os_callsign OS12 --tgt_callsign TGT51 --tcpa 01:00 --post_cpa 00:30 --cpa_lat 37.618805 --cpa_lon -122.375416 --os_s_lat 37.610000 --os_s_lon -122.390000 --os_e_lat 37.630000 --os_e_lon -122.360000 --tgt_s_lat 37.630000 --tgt_s_lon -122.360000 --tgt_e_lat 37.600000 --tgt_e_lon -122.390000 --os_speed 20 --tgt_speed 25 --conflict_dh 30 --tgt_alto 20
-
+```
 
 Step 5 — Output Files
 
@@ -208,7 +214,9 @@ During simulation, telemetry can be recorded using the provided logger.
 
 Run:
 
+```
 python telemetry_logger.py --mcast-ip 0.0.0.0 --port 14550 --log-file telemetry_log.json
+```
 
 This script will:
 
@@ -225,7 +233,9 @@ Once telemetry has been recorded, validation can be performed.
 
 Run:
 
+```
 python validate_accuracy.py --scenario scenario_log.json --telemetry telemetry_log.json
+```
 
 The validation script compares:
 
