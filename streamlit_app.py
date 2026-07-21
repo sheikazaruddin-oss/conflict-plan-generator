@@ -308,7 +308,7 @@ with tab1:
     ownship_to_waypoint_index = st.number_input(
         "Ownship To Waypoint Index",
         min_value=0,
-        value=3,
+        value=0,
         step=1,
         key="tct_ownship_to_waypoint_index"
     )
@@ -316,7 +316,7 @@ with tab1:
     target_to_waypoint_index = st.number_input(
         "Target To Waypoint Index",
         min_value=0,
-        value=2,
+        value=0,
         step=1,
         key="tct_target_to_waypoint_index"
     )
@@ -1118,7 +1118,7 @@ with tab2:
         "Target SysID",
         min_value=1,
         max_value=255,
-        value=0,
+        value=2,
         step=1,
         key="tct_plus_target_sysid"
     )
@@ -1140,7 +1140,7 @@ with tab2:
         st.number_input(
             "Target To Waypoint Index",
             min_value=0,
-            value=2,
+            value=0,
             step=1,
             key=(
                 "tct_plus_target_"
