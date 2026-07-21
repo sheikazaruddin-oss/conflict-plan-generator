@@ -1118,7 +1118,7 @@ with tab2:
         "Target SysID",
         min_value=1,
         max_value=255,
-        value=2,
+        value=0,
         step=1,
         key="tct_plus_target_sysid"
     )
@@ -1127,7 +1127,7 @@ with tab2:
         st.number_input(
             "Ownship To Waypoint Index",
             min_value=0,
-            value=3,
+            value=0,
             step=1,
             key=(
                 "tct_plus_ownship_"
